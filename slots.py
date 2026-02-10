@@ -10,34 +10,35 @@ COLS = 3
 
 symbol_count = {
     "🃏": 1,
-    "♠️": 1,
-    "🏆": 1,
-    "💎": 1,
-    "👑": 1,
-    "💲": 1,
-    "🍎": 2,
-    "🍇": 2,
-    "🍊": 2,
-    "🍋": 3,
-    "🍒": 4
+    "🏆": 2,
+    "💎": 3,
+    "💲": 4,
+    "🍇": 5,
+    "🍊": 5,
+    "🍋": 5,
+    "🍒": 5
 }
 
 symbol_value = {
-    "🃏": 10,
-    "♠️": 5,
-    "🏆": 4.5,
-    "💎": 4,
-    "👑": 3.5,
-    "💲": 3,
-    "🍎": 2.5,
-    "🍇": 2,
-    "🍊": 1.75,
-    "🍋": 1.5,
-    "🍒": 1.25
+    "🃏": 30,
+    "🏆": 15,
+    "💎": 10,
+    "💲": 5,
+    "🍇": 3,
+    "🍊": 3,
+    "🍋": 3,
+    "🍒": 1
 }
 
 def check_winnings(columns, lines, bet, values):
     winnings = 0
+    for line in range(lines):
+        if "🍒" in columns[0][line]:
+            winnings += bet
+            if "🍒" in columns[1][line]:
+                winnings += bet
+                break
+            break
     for line in range(lines):
         symbol = columns[0][line]
         for column in columns:
@@ -76,7 +77,6 @@ def print_slot_machine(columns):
                     print(column[row])
 
 def deposit():
-    print("Payouts: ")
     while True:
         amount = input("Insert Coin. How many coins do you insert? ")
         if amount.isdigit():
@@ -89,13 +89,22 @@ def deposit():
             print("Please enter a whole number.")
     return amount
 
-def get_bet():
+def get_bet(balance):
     while True:
         amount = input(f"What would you like to bet? 1=1 line, 4=2 lines, 9=3. Max {MAX_BET} coins. ")
         if amount.isdigit():
             amount = int(amount)
             if MIN_BET <= amount <= MAX_BET:
-                break
+                if amount <= balance:
+                    balance -= amount
+                    print(f"Bet: {amount} coins. New balance: {balance} coins.")
+                    break
+                else:
+                    print("You don't have enough coins to bet that amount.")
+                    print(f"Your current balance is {balance}")
+                    addbal = input("Funds low, do you want to insert more coins? (y/n)").lower()
+                    if addbal == "y":
+                        balance += deposit()                    
             else:
                 print(f"Must be between {MIN_BET} and {MAX_BET}.")
         else:
@@ -103,15 +112,12 @@ def get_bet():
     return amount
 
 def game_loop(balance):
-    while True:
-        bet = get_bet()
-        if bet > balance:
-            print("You don't have enough coins to bet that amount.")
-            print(f"Your current balance is {balance}")
-        else:
-            balance -= bet
-            break
-
+    if balance <= 15:
+        addbal = input("Funds low, do you want to insert more coins? (y/n)").lower()
+        if addbal == "y":
+            balance += deposit()
+    bet = get_bet(balance)
+    balance -= bet
     num_lines = math.floor(math.sqrt(bet))
     print(balance, bet, num_lines)
     print(f"You are betting {bet} on {num_lines} lines.")
@@ -119,14 +125,17 @@ def game_loop(balance):
     slots = get_spin(ROWS, COLS, symbol_count)
     print_slot_machine(slots)
     balance += check_winnings(slots, num_lines, bet, symbol_value)
-    input(f"Remaining balance: {balance}. Play again?")
+    print(f"Remaining balance: {balance}.")
+    return balance 
+
 
 def main():
+    print("🎰 WELCOME TO HOT SLOTS! 🎰")
     balance = deposit()
     while True:
-        play = input(f"Press enter to play, or enter (q) to quit").lower()
+        play = input(f"Press enter to play, or enter (q) to quit ").lower()
         if play != "q":
-            game_loop(balance)
+            balance = game_loop(balance)
         else:
             break
 main()
