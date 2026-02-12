@@ -8,6 +8,8 @@ MAX_BET = 15
 ROWS = 3
 COLS = 3
 
+balance = 0
+
 symbol_count = {
     "🃏": 1,
     "🏆": 2,
@@ -102,9 +104,10 @@ def get_bet(balance):
                 else:
                     print("You don't have enough coins to bet that amount.")
                     print(f"Your current balance is {balance}")
-                    addbal = input("Funds low, do you want to insert more coins? (y/n)").lower()
+                    addbal = input("Do you want to insert more coins? (y/n)").lower()
                     if addbal == "y":
-                        balance += deposit()                    
+                        balance += deposit()
+                        print(f"New balance: {balance} coins.")
             else:
                 print(f"Must be between {MIN_BET} and {MAX_BET}.")
         else:
@@ -112,6 +115,9 @@ def get_bet(balance):
     return amount
 
 def game_loop(balance):
+    if balance <= 0:
+        print("Out of coins.")
+        balance += deposit()
     if balance <= 15:
         addbal = input("Funds low, do you want to insert more coins? (y/n)").lower()
         if addbal == "y":
@@ -128,10 +134,10 @@ def game_loop(balance):
     print(f"Remaining balance: {balance}.")
     return balance 
 
-
 def main():
     print("🎰 WELCOME TO HOT SLOTS! 🎰")
-    balance = deposit()
+    global balance
+    balance += deposit()
     while True:
         play = input(f"Press enter to play, or enter (q) to quit ").lower()
         if play != "q":
