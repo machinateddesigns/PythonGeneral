@@ -73,6 +73,8 @@ def get_spin(rows, cols, symbols):
 def print_slot_machine(columns):
     for row in range(len(columns[0])):
             for i, column in enumerate(columns):
+                if i == 0:
+                    print(f"Line {row + 1} ", end = "")
                 if i != len(columns) - 1:
                     print(column[row], end = " | ")
                 else:
@@ -136,6 +138,7 @@ def game_loop(balance):
 
 def main():
     print("🎰 WELCOME TO HOT SLOTS! 🎰")
+    print(f"Payouts: 🃏🃏🃏x30 🏆🏆🏆x15 💎💎💎x10 💲💲💲x5 🍇🍇🍇x3 🍊🍊🍊x3 🍋🍋🍋x3 🍒x1 🍒🍒x2 🍒🍒🍒x3")
     global balance
     balance += deposit()
     while True:
@@ -143,5 +146,6 @@ def main():
         if play != "q":
             balance = game_loop(balance)
         else:
+            print(f"Remaining Balance: {balance} coins. Come back soon.")
             break
 main()
