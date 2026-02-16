@@ -1,7 +1,6 @@
 import random
 import turtle
 import time
-import inspect
 
 WIDTH, HEIGHT = 500, 500
 MIN_BET = 1
