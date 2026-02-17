@@ -65,8 +65,7 @@ def race():
             x, y = racer.pos()
             if y >= (HEIGHT/2-25):
                 return(turtles.index(racer)+1)
-                #return tNames[turtles.index(racer)+1]
-            
+
 def createTurtles():
     turtles = []
 
