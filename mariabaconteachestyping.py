@@ -2,8 +2,7 @@ import curses
 from curses import wrapper
 import time
 import random
-file_path = "typingtext.txt"
-with open(file_path, 'r') as f:
+with open("typingtext.txt", 'r') as f:
     content = f.read()
     lines = content.splitlines()
 def start_screen(stdscr):
