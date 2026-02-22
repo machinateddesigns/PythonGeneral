@@ -18,10 +18,16 @@ games = scoreboard["games"]
 
 def getGames():
     print(scoreboard['gameDate'])
+    print('''-------------------------------------''')
     for game in games:
         homeTeam = game['homeTeam']
         awayTeam = game['awayTeam']
+        homeScore = homeTeam['score']
+        awayScore = awayTeam['score']
         period = game['period']
+        if period == 0:
+            homeScore = ""
+            awayScore = ""
         clock = game['gameClock']
         if clock == "":
             clock = 0
@@ -29,6 +35,14 @@ def getGames():
         leaders = game['gameLeaders']
         hLeaders = leaders['homeLeaders']
         aLeaders = leaders['awayLeaders']
-        print(f"{homeTeam['teamCity']} {homeTeam['teamName']} {homeTeam['score']} VS {awayTeam['teamCity']} {awayTeam['teamName']} {awayTeam['score']} | Time Left: {clock} | Periods: {period} | Status: {status}\nGame Leaders: Home: {hLeaders['jerseyNum']} {hLeaders['name']} Away: {aLeaders['jerseyNum']} {aLeaders['name']}\n----------------------")
+        print(f'''{homeTeam['teamCity']} {homeTeam['teamName']} {homeScore} 
+VS 
+{awayTeam['teamCity']} {awayTeam['teamName']} {awayScore}''')
+        print(f"{status}")
+        if status == "Final":
+            print(f'''Game Leaders: 
+Home: {hLeaders['jerseyNum']} {hLeaders['name']} 
+Away: {aLeaders['jerseyNum']} {aLeaders['name']}''')
+        print('''-------------------------------------''')
         #break
 getGames()
