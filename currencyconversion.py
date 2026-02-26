@@ -14,7 +14,7 @@ import webbrowser
 
 #a painstakingly constructed list, grabbed from the API and converted from JSON to what you see here.
 curCodes = ["USD", "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "FOK", "GBP", "GEL", "GGP", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JEP", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KID", "KMF", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLE", "SLL", "SOS", "SRD", "SSP", "STN", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TVD", "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XCD", "XDR", "XOF", "XPF", "YER", "ZAR", "ZMW", "ZWL"]
-
+API_KEY = "9956274efae582820753793c" #Your API Key Here
 #Grabbing my posFloat function from other programs to make sure they input a positive number.
 def posFloat(y):
     while True:
@@ -69,7 +69,7 @@ def runConversion():
 #Have the user input the amount they want to convert from base to the selection
     amountFrom = posFloat(f"Enter the amount of {base} you wish to convert into {selection}: ")
 #Here's where we set the API data including the dynamic base
-    url = f"https://v6.exchangerate-api.com/v6/9956274efae582820753793c/latest/{base}"
+    url = f"https://v6.exchangerate-api.com/v6/{API_KEY}/latest/{base}"
 #This calls the RESTful API utilizing the requests module we imported
     response = requests.get(url)
 #if the status code is 200, meaning it was successful, 
