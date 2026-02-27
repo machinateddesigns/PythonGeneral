@@ -81,7 +81,7 @@ def runConversion():
 #Now we take that data we obtained using the selection as the key, and multiply the amount the user wants to convert by that number, obtaining the result
         convertedAmount = conversion * amountFrom
 #We then print the result for the user, and exit this function, and the whole program.
-        print(f"The current conversion rate for {base} to {selection} is {conversion}{selection} to 1{base}. Your {amountFrom} {base} is now {convertedAmount} {selection}.")
+        print(f"The current conversion rate for {base} to {selection} is {conversion} {selection} to 1 {base}. Your {amountFrom} {base} is now {convertedAmount} {selection}.")
         return
 #Unless something went wrong, in which case, we just have the program end. There's not much I can do if their API isn't working at this point, or I've run out of free uses for the month.
     else:
