@@ -1,3 +1,5 @@
+#Tim's version. No longer works. For example only.
+
 from requests import get
 from pprint import PrettyPrinter
 

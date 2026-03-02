@@ -168,12 +168,12 @@
     "XCD":["East Caribbean Dollar", "$"],
     "XCG":["Caribbean Guilder", "ƒ"],
     "XDR":["Special Drawing Rights", "SDR"],
-    "XOF":["CFA Franc BCEAO", "Fr"],
-    "XPF":["CFP Franc", "Fr"],
+    "XOF":["CFA Franc BCEAO", "CFA"],
+    "XPF":["CFP Franc", "₣"],
     "YER":["Yemeni Rial", "﷼"],
     "ZAR":["South African Rand", "R"],
     "ZMK":["Zambian Kwacha (pre-2013)", "ZK"],
     "ZMW":["Zambian Kwacha", "ZK"],
-    "ZWL":["Zimbabwean Dollar", "$"]
+    "ZWL":["Zimbabwean Dollar", "Z$"]
   }
 }
