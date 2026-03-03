@@ -51,7 +51,7 @@ def check_word(guess, real_word):
     return correct_pos, incorrect_pos, correct_letter, letter_shifted
 
 def game():
-    print(f"Welcome to CODE WORD, you have {TRIES} to guess the {CODE_LENGTH} letter word.")
+    print(f"Welcome to CODE WORD, you have {TRIES} tries to guess the {CODE_LENGTH} letter word.")
 
     word = random.choice(WORDLIST).lower()
     for attempts in range(1, TRIES + 1):
