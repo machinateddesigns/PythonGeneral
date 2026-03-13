@@ -20,7 +20,7 @@ def col(color):
         with open(colorspaceurl, "r") as f:
             data = json.load(f)
     except FileNotFoundError:
-        print(f"Error: The file '{file_path}' was not found.")
+        print(f"Error: The file '{colorspaceurl}' was not found.")
     except json.JSONDecodeError:
         print(f"Error: Failed to decode JSON from the file. Check if the JSON is valid.")
     except KeyError as e:
@@ -74,6 +74,8 @@ font_c = pygame.font.Font('Open_Sans/static/OpenSans_Condensed-Regular.ttf', 18)
 
 numbers = [1,2,3,4,5]
 
+rolls_left = 3
+
 #creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
     def __init__(self, x_pos, y_pos, num_pip, key):
@@ -98,8 +100,18 @@ class Dice:
             pygame.draw.circle(screen, black, (self.x_pos + 75, self.y_pos + 50), 10)
 
 def draw_stuff():
-    print("useless so far")
-
+    global rolls_left #just in case I want to separate the rolls left from the roll button
+    #roll_text = font_b.render('Click to Roll', True, white)    this is handled elsewhere in my version
+    #screen.blit(roll_text, (85, 167))                          this is handled more cleanly elsewhere
+    #accept_text = font_m.render('Accept Turn', True, white)    this is handled elsewhere
+    #screen.blit(accept_text, (375, 167))                       again, I handled this better elsewhere
+    rolls_text = font_b.render(f'Rolls left this turn: {rolls_left}', True, white)
+    screen.blit(rolls_text, (10, 10))
+    pygame.draw.rect(screen, white, [0, 240, 225, HEIGHT - 200])
+    pygame.draw.line(screen, black, (0, 40), (WIDTH, 40), 3)
+    pygame.draw.line(screen, black, (0, 240), (WIDTH, 240), 3)
+    pygame.draw.line(screen, black, (155, 240), (155, HEIGHT), 3)
+    pygame.draw.line(screen, black, (225, 240), (225, HEIGHT), 3)
 
 #creating a button class so I don't need to do this over and over
 class Button:
@@ -233,7 +245,7 @@ def main():
         accept_button = Button(240, 165, 200, 50, gray, 5, accept_text, font_m, black, 0)
         accept_button.draw()
 
-        #draw_stuff()
+        draw_stuff()
 
         ones = Choice(0, 240, 225, 30, '1s', True, True, False )
         twos = Choice(0, 270, 225, 30, '2s', True, True, False )
