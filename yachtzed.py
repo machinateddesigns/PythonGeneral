@@ -74,7 +74,11 @@ font_c = pygame.font.Font('Open_Sans/static/OpenSans_Condensed-Regular.ttf', 18)
 
 numbers = [1,2,3,4,5]
 
-rolls_left = 3
+#rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
+
+selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 
 #creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
@@ -100,12 +104,14 @@ class Dice:
             pygame.draw.circle(screen, black, (self.x_pos + 75, self.y_pos + 50), 10)
 
 def draw_stuff():
-    global rolls_left #just in case I want to separate the rolls left from the roll button
+    #global rolls_left #just in case I want to separate the rolls left from the roll button
+    #global rolls_remaining #my own spin on it, see if this works, looks like it's unnecessary
     #roll_text = font_b.render('Click to Roll', True, white)    this is handled elsewhere in my version
     #screen.blit(roll_text, (85, 167))                          this is handled more cleanly elsewhere
     #accept_text = font_m.render('Accept Turn', True, white)    this is handled elsewhere
     #screen.blit(accept_text, (375, 167))                       again, I handled this better elsewhere
-    rolls_text = font_b.render(f'Rolls left this turn: {rolls_left}', True, white)
+    #rolls_text = font_b.render(f'Rolls left this turn: {rolls_left}', True, white) #hide this for now
+    rolls_text = font_b.render(f'Rolls left this turn: {rolls_remaining}', True, white)
     screen.blit(rolls_text, (10, 10))
     pygame.draw.rect(screen, white, [0, 240, 225, HEIGHT - 200])
     pygame.draw.line(screen, black, (0, 40), (WIDTH, 40), 3)
@@ -170,29 +176,107 @@ class Choice:
     def draw(self):
         pygame.draw.line(screen, black, (self.x_pos, self.y_pos),(self.x_pos + self.width, self.y_pos), 2)
         pygame.draw.line(screen, black, (self.x_pos, self.y_pos + self.height),(self.x_pos + self.width, self.y_pos + self.height), 2)
+        
         if not self.done:
             if self.possible:
-                my_text = (self.text, True, forestgreen)
+                possiblecolor = forestgreen
             elif not self.possible:
-                my_text = (self.text, True, brickred)
+                possiblecolor = brickred
         else:
-            my_text = (self.text, True, darkgray)
-        my_text = font_m.render(self.text, True, black)
+            possiblecolor = darkgray
+        my_text = font_m.render(self.text, True, possiblecolor)
         if self.text == "Grand Total":
-            my_text = font_b.render(self.text, True, black)
+            my_text = font_b.render(self.text, True, possiblecolor)
         text_rect = my_text.get_rect()
         text_rect.centery = self.centery
         text_rect.x = 10
         screen.blit(my_text, text_rect)
 
+
+
+def check_possible(possible_list, numbers_list):
+    max_count = 0
+    pairodice = 0
+#something is wrong with the logic. Try running it. Send it to claude.
+    possible_list[0] = True #ones
+    possible_list[1] = True #twos
+    possible_list[2] = True #threes
+    possible_list[3] = True #fours
+    possible_list[4] = True #fives
+    possible_list[5] = True #sixes
+    possible_list[13] = True #chance
+
+    for index in range(1,7):
+        if numbers_list.count(index) > max_count:
+            max_count = numbers_list.count(index)
+    
+    if max_count >= 3:
+        possible_list[7] = True
+        if max_count >= 4:
+            possible_list[8] = True
+            if max_count == 5:
+                possible_list[9] = True
+
+    if max_count == 2:
+        pairodice +=1
+
+    elif max_count < 3:
+        possible_list[7] = False
+        possible_list[8] = False
+        possible_list[9] = False
+        possible_list[10] = False
+        twopairchecker = False
+        if pairodice == 2:
+            possible_list[6] = True
+            twopairchecker = True
+        if not twopairchecker:
+            possible_list[6] = False
+
+    elif max_count == 3:
+        possible_list[8] = False
+        possible_list[9] = False
+        checker = False
+        for index in range(len(numbers_list)):
+            if numbers_list.count(numbers_list[index]) == 2:
+                possible_list[10] = True
+                checker = True
+        if not checker:
+            possible_list[10] = False
+    
+    elif max_count == 4:
+        possible_list[9] = False
+
+    lowest = 10
+    highest = 0
+    for index in range(len(numbers_list)):
+        if numbers_list[index] < lowest:
+            lowest = numbers_list[index]
+        if numbers_list[index] > highest:
+            highest = numbers_list[index]
+        
+    if (lowest + 1 in numbers_list) and (lowest + 2 in numbers_list) and (lowest + 3 in numbers_list) and (lowest + 4 in numbers_list):
+        possible_list[12] = True
+    else:
+        possible_list[12] = False
+
+    if ((lowest + 1 in numbers_list) and (lowest + 2 in numbers_list) and (lowest + 3 in numbers_list)) or ((highest - 1 in numbers_list) and (highest - 2 in numbers_list) and (highest-3 in numbers_list)):
+        possible_list[11] = True
+    else:
+        possible_list[11] = False
+
+    return possible_list
+
 def main():
     
     running = True
     roll = False
+    #globalize the variable
+    global rolls_remaining
     #local rolls variable
-    rolls_remaining = 3
+    rolls_remaining = 10 #3
     #Loading dice sounds
-
+    #need to load possible as a global variable before it's used or redefined
+    global possible
     #Shake effect intiialization for dice or other objects
     shakex = 0
     shakey = 0
@@ -204,6 +288,7 @@ def main():
     while running:
         timer.tick(fps)
         screen.fill(background)
+        
 
         if pygame.mixer.get_busy():
             for x in shakex:
@@ -247,28 +332,57 @@ def main():
 
         draw_stuff()
 
-        ones = Choice(0, 240, 225, 30, '1s', True, True, False )
-        twos = Choice(0, 270, 225, 30, '2s', True, True, False )
-        threes = Choice(0, 300, 225, 30, '3s', True, True, False )
-        fours = Choice(0, 330, 225, 30, '4s', True, True, False )
-        fives = Choice(0, 360, 225, 30, '5s', True, True, False )
-        sixes = Choice(0, 390, 225, 30, '6s', True, True, False )
-        uppersubt = Choice(0, 420, 225, 30, 'Upper Score', False, False, True )
+        ones = Choice(0, 240, 225, 30, '1s', selected_choice[0], possible[0], done[0] )
+        twos = Choice(0, 270, 225, 30, '2s', selected_choice[1], possible[1], done[1] )
+        threes = Choice(0, 300, 225, 30, '3s', selected_choice[2], possible[2], done[2] )
+        fours = Choice(0, 330, 225, 30, '4s', selected_choice[3], possible[3], done[3] )
+        fives = Choice(0, 360, 225, 30, '5s', selected_choice[4], possible[4], done[4] )
+        sixes = Choice(0, 390, 225, 30, '6s', selected_choice[5], possible[5], done[5] )
+        uppersubt = Choice(0, 420, 225, 30, 'Upper Score', False, False, False )
         upperbonus = Choice(0, 450, 225, 30, 'Bonus if 63+', False, False, True )
         uppertotal = Choice(0, 480, 225, 30, 'Upper Total', False, False, True )
 
-        two_pair = Choice(0, 520, 225, 30, 'Two Pair', True, True, False )
-        three_kind = Choice(0, 550, 225, 30, 'Three of a Kind', True, True, False )
-        four_kind = Choice(0, 580, 225, 30, 'Four of a Kind', True, True, False )
-        yachtzed = Choice(0, 770, 225, 30, 'YACHTZED!', True, True, False )
-        full_house = Choice(0, 610, 225, 30, 'Full House', True, True, False )
-        sm_straight = Choice(0, 640, 225, 30, 'Small Straight', True, True, False )
-        lg_straight = Choice(0, 670, 225, 30, 'Large Straight', True, True, False )
-        chance = Choice(0, 700, 225, 30, 'Chance', True, True, False )
-        lowersubt = Choice(0, 740, 225, 30, 'Lower Subtotal', True, True, False )
-        bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', True, True, False )
-        bonus2 = Choice(0, 830, 225, 30, 'Bonus Yachtzed', True, True, False )
-        grandtotal = Choice(0, 870, 225, 30, 'Grand Total', True, True, False )
+        two_pair = Choice(0, 520, 225, 30, 'Two Pair', selected_choice[6], possible[6], done[6] )
+        three_kind = Choice(0, 550, 225, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7] )
+        four_kind = Choice(0, 580, 225, 30, 'Four of a Kind', selected_choice[8], possible[8], done[8] )
+        yachtzed = Choice(0, 770, 225, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9] )
+        full_house = Choice(0, 610, 225, 30, 'Full House', selected_choice[10], possible[10], done[10])
+        sm_straight = Choice(0, 640, 225, 30, 'Small Straight', selected_choice[11], possible[11], done[11] )
+        lg_straight = Choice(0, 670, 225, 30, 'Large Straight', selected_choice[12], possible[12], done[12] )
+        chance = Choice(0, 700, 225, 30, 'Chance', selected_choice[13], possible[13], done[13] )
+        lowersubt = Choice(0, 740, 225, 30, 'Lower Subtotal', False, False, False )
+        bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', False, False, False )
+        bonus2 = Choice(0, 830, 225, 30, 'Bonus Yachtzed', False, False, False )
+        grandtotal = Choice(0, 870, 225, 30, 'Grand Total', False, False, False )
+
+        
+       
+
+
+        
+        mouse_pos = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if roll_button.button.collidepoint(event.pos):
+                    roll_button.pressed = True
+                    if rolls_remaining > 0:
+                        roll = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                if roll_button.pressed == True:
+                    roll_button.pressed = False
+        if roll:
+            dice_sounds = random.choice(["FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV","FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE2.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV"])
+            #for number in range(len(numbers)):
+                #numbers[number] = random.randint(1,6)
+            #rolls_left -= 1
+            rolls_remaining -= 1
+            pygame.mixer.Sound(dice_sounds).play()
+            roll = False
+        
+        possible = check_possible(possible, numbers)
 
         ones.draw()
         twos.draw()
@@ -295,28 +409,6 @@ def main():
         bonus2.draw()
 
         grandtotal.draw()
-        
-        mouse_pos = pygame.mouse.get_pos()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if roll_button.button.collidepoint(event.pos):
-                    roll_button.pressed = True
-                    if rolls_remaining > 0:
-                        roll = True
-            if event.type == pygame.MOUSEBUTTONUP:
-                if roll_button.pressed == True:
-                    roll_button.pressed = False
-        if roll:
-            dice_sounds = random.choice(["FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV","FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE2.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV"])
-            for number in range(len(numbers)):
-                numbers[number] = random.randint(1,6)
-            rolls_remaining -= 1
-            pygame.mixer.Sound(dice_sounds).play()
-            roll = False
-            
 
         pygame.display.flip()
 
