@@ -220,7 +220,7 @@ def check_possible(possible_list, numbers_list):
     if max_count == 2:
         pairodice +=1
 
-    elif max_count < 3:
+    if max_count < 3:
         possible_list[7] = False
         possible_list[8] = False
         possible_list[9] = False
@@ -232,7 +232,7 @@ def check_possible(possible_list, numbers_list):
         if not twopairchecker:
             possible_list[6] = False
 
-    elif max_count == 3:
+    if max_count == 3:
         possible_list[8] = False
         possible_list[9] = False
         checker = False
@@ -243,7 +243,7 @@ def check_possible(possible_list, numbers_list):
         if not checker:
             possible_list[10] = False
     
-    elif max_count == 4:
+    if max_count == 4:
         possible_list[9] = False
 
     lowest = 10
