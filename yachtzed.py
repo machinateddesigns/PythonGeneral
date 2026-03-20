@@ -299,7 +299,7 @@ def make_choice(clicked_num, selected, done_list):
     for index in range(len(selected)):
         selected[index] = False
     if not done[clicked_num]:
-        selected[number] = True
+        selected[clicked_num] = True #where I've left off 3/20/2026
     return selected
 
 def main():
