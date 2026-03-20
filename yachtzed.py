@@ -8,6 +8,9 @@ import pygame
 pygame.init()
 pygame.mixer.init()
 
+game_icon = pygame.image.load('dieicon.png')
+pygame.display.set_icon(game_icon)
+
 #screen width and height constants
 WIDTH = 600
 HEIGHT = 900
@@ -72,21 +75,28 @@ font_m = pygame.font.Font('Open_Sans/static/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('Open_Sans/static/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('Open_Sans/static/OpenSans_Condensed-Regular.ttf', 18)
 
-numbers = [1,2,3,4,5]
+numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
+
 
 #rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
+
+dice_selected = [False, False, False, False, False]
 
 selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+clicked = -1
+
 
 #creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
     def __init__(self, x_pos, y_pos, num_pip, key):
+        global dice_selected
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.number = num_pip
         self.key = key
+        self.selected = dice_selected[key]
         self.die = ''
 
     def draw(self):
@@ -102,6 +112,16 @@ class Dice:
         if self.number == 6:
             pygame.draw.circle(screen, black, (self.x_pos + 25, self.y_pos + 50), 10)
             pygame.draw.circle(screen, black, (self.x_pos + 75, self.y_pos + 50), 10)
+
+        if self.selected:
+            pygame.draw.rect(screen, forestgreen, [self.x_pos, self.y_pos, 100, 100], 5, 5)
+        
+    def check_click(self, coords):
+        if self.die.collidepoint(coords):
+            if dice_selected[self.key]:
+                dice_selected[self.key] = False
+            elif not dice_selected[self.key]:
+                dice_selected[self.key] = True
 
 def draw_stuff():
     #global rolls_left #just in case I want to separate the rolls left from the roll button
@@ -162,6 +182,7 @@ class Button:
 #Choices / Options. Those spaces where the scores and numbers are tallied.
 class Choice:
     def __init__(self, x_pos, y_pos, width, height, text, select, possible, done):
+        
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.width = width
@@ -192,12 +213,19 @@ class Choice:
         text_rect.x = 10
         screen.blit(my_text, text_rect)
 
-
+'''    def check_click(self, coords):
+        if self.die.collidepoint(coords):
+            if dice_selected[self.key]:
+                dice_selected[self.key] = False
+            elif not dice_selected[self.key]:
+                dice_selected[self.key] = True'''
 
 def check_possible(possible_list, numbers_list):
     max_count = 0
     pairodice = 0
-#something is wrong with the logic. Try running it. Send it to claude.
+    #needed for alternate way to check for full house
+    #has_three = False
+    #something is wrong with the logic. Try running it. Send it to claude.
     possible_list[0] = True #ones
     possible_list[1] = True #twos
     possible_list[2] = True #threes
@@ -207,9 +235,19 @@ def check_possible(possible_list, numbers_list):
     possible_list[13] = True #chance
 
     for index in range(1,7):
-        if numbers_list.count(index) > max_count:
-            max_count = numbers_list.count(index)
+        count = numbers_list.count(index)
+        if count > max_count:
+            max_count = count
+        if count == 2:
+            pairodice += 1
+        #if count == 3:
+            #has_three = True
     
+    #Checks for 2 of more pairs of different dice
+    possible_list[6] = pairodice >= 2
+    #this is an alternate way to check for a full house
+    #possible_list[10] = has_three and pairodice >= 1
+
     if max_count >= 3:
         possible_list[7] = True
         if max_count >= 4:
@@ -217,20 +255,11 @@ def check_possible(possible_list, numbers_list):
             if max_count == 5:
                 possible_list[9] = True
 
-    if max_count == 2:
-        pairodice +=1
-
     if max_count < 3:
         possible_list[7] = False
         possible_list[8] = False
         possible_list[9] = False
         possible_list[10] = False
-        twopairchecker = False
-        if pairodice == 2:
-            possible_list[6] = True
-            twopairchecker = True
-        if not twopairchecker:
-            possible_list[6] = False
 
     if max_count == 3:
         possible_list[8] = False
@@ -266,6 +295,13 @@ def check_possible(possible_list, numbers_list):
 
     return possible_list
 
+def make_choice(clicked_num, selected, done_list):
+    for index in range(len(selected)):
+        selected[index] = False
+    if not done[clicked_num]:
+        selected[number] = True
+    return selected
+
 def main():
     
     running = True
@@ -286,17 +322,22 @@ def main():
     roll_button = Button(5, 165, 200, 50, gray, 5, roll_text, font_m, black, 0)
 
     while running:
+        
         timer.tick(fps)
         screen.fill(background)
         
 
         if pygame.mixer.get_busy():
-            for x in shakex:
-                shakex[x] = random.randint(-3,3)
-            for y in shakey:
-                shakey[y] = random.randint(-3,3)
-            for number in range(len(numbers)):
-                numbers[number] = random.randint(1,6)
+            
+                for x in range(len(shakex)):
+                    if not dice_selected[x]:
+                        shakex[x] = random.randint(-3,3)
+                for y in range(len(shakey)):
+                    if not dice_selected[y]:
+                        shakey[y] = random.randint(-3,3)
+                for number in range(len(numbers)):
+                    if not dice_selected[number]:
+                        numbers[number] = random.randint(1,6)
         else:
             shakex = [0,0,0,0,0]
             shakey = [0,0,0,0,0]
@@ -345,27 +386,60 @@ def main():
         two_pair = Choice(0, 520, 225, 30, 'Two Pair', selected_choice[6], possible[6], done[6] )
         three_kind = Choice(0, 550, 225, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7] )
         four_kind = Choice(0, 580, 225, 30, 'Four of a Kind', selected_choice[8], possible[8], done[8] )
-        yachtzed = Choice(0, 770, 225, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9] )
+        yachtzed = Choice(0, 740, 225, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9] )
         full_house = Choice(0, 610, 225, 30, 'Full House', selected_choice[10], possible[10], done[10])
         sm_straight = Choice(0, 640, 225, 30, 'Small Straight', selected_choice[11], possible[11], done[11] )
         lg_straight = Choice(0, 670, 225, 30, 'Large Straight', selected_choice[12], possible[12], done[12] )
         chance = Choice(0, 700, 225, 30, 'Chance', selected_choice[13], possible[13], done[13] )
-        lowersubt = Choice(0, 740, 225, 30, 'Lower Subtotal', False, False, False )
+        lowersubt = Choice(0, 770, 225, 30, 'Lower Subtotal', False, False, False )
         bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', False, False, False )
         bonus2 = Choice(0, 830, 225, 30, 'Bonus Yachtzed', False, False, False )
         grandtotal = Choice(0, 870, 225, 30, 'Grand Total', False, False, False )
 
-        
-       
-
-
-        
         mouse_pos = pygame.mouse.get_pos()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                die1.check_click(event.pos)
+                die2.check_click(event.pos)
+                die3.check_click(event.pos)
+                die4.check_click(event.pos)
+                die5.check_click(event.pos)
+                if 0 <= event.pos[0] <= 155:
+                    if 240 <= event.pos[1] <= 420 or 520 <= event.pos[1] <= 730 or 740 <= event.pos[1] <= 770:
+                        if 240 <= event.pos[1] <= 270:
+                            clicked = 0
+                        if 270 <= event.pos[1] <= 300:
+                            clicked = 1
+                        if 300 <= event.pos[1] <= 330:
+                            clicked = 2
+                        if 330 <= event.pos[1] <= 360:
+                            clicked = 3
+                        if 360 <= event.pos[1] <= 390:
+                            clicked = 4
+                        if 390 <= event.pos[1] <= 420:
+                            clicked = 5
+
+                        if 520 <= event.pos[1] <= 550:
+                            clicked = 6
+                        if 550 <= event.pos[1] <= 580:
+                            clicked = 7
+                        if 580 <= event.pos[1] <= 610:
+                            clicked = 8
+                        if 610 <= event.pos[1] <= 640:
+                            clicked = 10
+                        if 640 <= event.pos[1] <= 670:
+                            clicked = 11
+                        if 670 <= event.pos[1] <= 700:
+                            clicked = 12
+                        if 700 <= event.pos[1] <= 730:
+                            clicked = 13
+                        if 740 <= event.pos[1] <= 770:
+                            clicked = 9
+                        selected_choice = make_choice[clicked, selected_choice, done]
+
                 if roll_button.button.collidepoint(event.pos):
                     roll_button.pressed = True
                     if rolls_remaining > 0:
