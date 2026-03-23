@@ -1,6 +1,6 @@
 #imports
 import random
-import time
+#import time
 import json
 import pygame
 
@@ -90,6 +90,7 @@ score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 totals = [0,0,0,0,0,0,0]
 clicked = -1 #this might need to be global
 current_score = 0
+something_selected = False
 
 #creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
@@ -278,6 +279,22 @@ def check_scores(choice_list, numbers_list, possible_list, current_score):
             current_score = 0  
     return current_score
 
+def check_totals(totals_list, score_list, bonus):
+    totals_list[0] = score_list[0] + score_list[1] + score_list[2] + score_list[3] + score_list[4] + score_list[5]
+    if totals_list[0] >= 63:
+        totals_list[1] = 35
+    else:
+        totals_list[1] = 0
+    totals_list[2] = totals_list[0] + totals_list[1]
+    if bonus:
+        totals_list[3] = 100
+        bonus = False
+    if bonus == True and totals_list[3] == 100:
+        totals_list[4] += 100
+        bonus = False
+    totals_list[5] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + score_list[13] + totals_list[3] + totals_list[4]
+    totals_list[6] = totals_list[2] + totals_list[5]
+    return totals_list, bonus
 
 def check_possible(possible_list, numbers_list):
     max_count = 0
@@ -368,7 +385,7 @@ def main():
     #globalize the variable
     global rolls_remaining
     #local rolls variable
-    rolls_remaining = 10 #3
+    rolls_remaining = 3 #3
     #Loading dice sounds
     #need to load possible as a global variable before it's used or redefined
     global possible
@@ -376,6 +393,9 @@ def main():
     global done
     global score
     global totals
+    global something_selected
+    global numbers
+    bonus_time = False
     #Shake effect intialization for dice or other objects
     shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
     shakey = [0,0,0,0,0]
@@ -383,6 +403,10 @@ def main():
     #setting the roll button parameters
     roll_text = f"Rolls Remaining: {rolls_remaining}"
     roll_button = Button(5, 165, 200, 50, gray, 5, roll_text, font_m, black, 0)
+
+    #setting accept button parameters
+    accept_text = f"Accept Turn"
+    accept_button = Button(240, 165, 200, 50, gray, 5, accept_text, font_m, black, 0)
 
     while running:
         
@@ -404,6 +428,9 @@ def main():
         else:
             shakex = [0,0,0,0,0]
             shakey = [0,0,0,0,0]
+
+        if True in selected_choice:
+            something_selected = True
 
         #setting the dice positions, list key, and object key
         die1 = Dice(10 + shakex[0], 50 + shakey[0], numbers[0], 0)
@@ -430,8 +457,15 @@ def main():
         #drawing the roll button
         roll_button.draw()
 
-        accept_text = f"Accept Turn"
-        accept_button = Button(240, 165, 200, 50, gray, 5, accept_text, font_m, black, 0)
+        #Text for the roll button
+        accept_button.text = f"Accept Turn"
+
+        if accept_button.button and accept_button.button.collidepoint(mouse_pos):
+            accept_button.color = lightgray  # hover color
+            accept_button.textcolor = darkgray
+        else:
+            accept_button.color = gray      # default color
+            accept_button.textcolor = black
         accept_button.draw()
 
         draw_stuff()
@@ -507,6 +541,20 @@ def main():
                     roll_button.pressed = True
                     if rolls_remaining > 0:
                         roll = True
+                if accept_button.button.collidepoint(event.pos) and something_selected and rolls_remaining < 3:
+                    if score[11] == 50 and done[11] and possible[11]:
+                        bonus_time = True
+                    for i in range(len(selected_choice)):
+                        if selected_choice[i]:
+                            done[i] = True
+                            score[i] = current_score
+                            selected_choice[i] = False
+                    for i in range(len(dice_selected)):
+                        dice_selected[i] = False
+                    numbers = [0, -7, -9, -9, -8]
+                    something_selected = False
+                    rolls_remaining = 3
+
             if event.type == pygame.MOUSEBUTTONUP:
                 if roll_button.pressed == True:
                     roll_button.pressed = False
@@ -521,6 +569,7 @@ def main():
         
         possible = check_possible(possible, numbers)
         current_score = check_scores(selected_choice, numbers, possible, score)
+        totals, bonus_time = check_totals(totals, score, bonus_time)
 
         ones.draw()
         twos.draw()
