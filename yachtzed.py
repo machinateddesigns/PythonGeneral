@@ -48,6 +48,7 @@ brown = tuple(col("Brown"))
 burlywood = tuple(col("Burlywood"))
 brickred = tuple(col("Firebrick"))
 forestgreen = tuple(col("ForestGreen"))
+gold = tuple(col("Gold"))
 
 #background color can be set from above colors
 background = burlywood
@@ -85,8 +86,10 @@ dice_selected = [False, False, False, False, False]
 selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-clicked = -1
-
+score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+totals = [0,0,0,0,0,0,0]
+clicked = -1 #this might need to be global
+current_score = 0
 
 #creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
@@ -181,7 +184,7 @@ class Button:
 
 #Choices / Options. Those spaces where the scores and numbers are tallied.
 class Choice:
-    def __init__(self, x_pos, y_pos, width, height, text, select, possible, done):
+    def __init__(self, x_pos, y_pos, width, height, text, select, possible, done, score):
         
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -191,6 +194,7 @@ class Choice:
         self.select = select
         self.possible = possible
         self.done = done
+        self.score = score
         #self.centerx = (self.width // 2) + x_pos
         self.centery = (self.height // 2) + y_pos
     
@@ -205,6 +209,10 @@ class Choice:
                 possiblecolor = brickred
         else:
             possiblecolor = darkgray
+        
+        if self.select:
+            pygame.draw.rect(screen, gold, [self.x_pos, self.y_pos, 155, 30])
+
         my_text = font_m.render(self.text, True, possiblecolor)
         if self.text == "Grand Total":
             my_text = font_b.render(self.text, True, possiblecolor)
@@ -213,12 +221,63 @@ class Choice:
         text_rect.x = 10
         screen.blit(my_text, text_rect)
 
-'''    def check_click(self, coords):
+        score_text = font_m.render(str(self.score), True, possiblecolor)
+        text_rect = score_text.get_rect()
+        text_rect.centery = self.centery
+        text_rect.x = 175
+        screen.blit(score_text, text_rect)
+
+    def check_click(self, coords):
         if self.die.collidepoint(coords):
             if dice_selected[self.key]:
                 dice_selected[self.key] = False
             elif not dice_selected[self.key]:
-                dice_selected[self.key] = True'''
+                dice_selected[self.key] = True
+
+def check_scores(choice_list, numbers_list, possible_list, current_score):
+    active = 0
+    for index in range(len(choice_list)):
+        if choice_list[index]:
+            active = index
+    if active == 0:
+        current_score = numbers_list.count(1) * 1
+    elif active == 1:
+        current_score = numbers_list.count(2) * 2
+    elif active == 2:
+        current_score = numbers_list.count(3) * 3
+    elif active == 3:
+        current_score = numbers_list.count(4) * 4
+    elif active == 4:
+        current_score = numbers_list.count(5) * 5
+    elif active == 5:
+        current_score = numbers_list.count(6) * 6
+    elif active == 6 or active == 7 or active == 8 or active == 13:
+        if possible_list[active]:
+            current_score = sum(numbers_list)
+        else:
+            current_score = 0
+    elif active == 9:
+        if possible_list[active]:
+            current_score = 50
+        else:
+            current_score = 0
+    elif active == 10:
+        if possible_list[active]:
+            current_score = 25
+        else:
+            current_score = 0
+    elif active == 11:
+        if possible_list[active]:
+            current_score = 30
+        else:
+            current_score = 0
+    elif active == 12:
+        if possible_list[active]:
+            current_score = 40
+        else:
+            current_score = 0  
+    return current_score
+
 
 def check_possible(possible_list, numbers_list):
     max_count = 0
@@ -298,12 +357,12 @@ def check_possible(possible_list, numbers_list):
 def make_choice(clicked_num, selected, done_list):
     for index in range(len(selected)):
         selected[index] = False
-    if not done[clicked_num]:
+    if not done_list[clicked_num]:
         selected[clicked_num] = True #where I've left off 3/20/2026
     return selected
 
 def main():
-    
+    global clicked #why not just make the original global?
     running = True
     roll = False
     #globalize the variable
@@ -313,9 +372,13 @@ def main():
     #Loading dice sounds
     #need to load possible as a global variable before it's used or redefined
     global possible
-    #Shake effect intiialization for dice or other objects
-    shakex = 0
-    shakey = 0
+    global selected_choice
+    global done
+    global score
+    global totals
+    #Shake effect intialization for dice or other objects
+    shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
+    shakey = [0,0,0,0,0]
 
     #setting the roll button parameters
     roll_text = f"Rolls Remaining: {rolls_remaining}"
@@ -373,28 +436,28 @@ def main():
 
         draw_stuff()
 
-        ones = Choice(0, 240, 225, 30, '1s', selected_choice[0], possible[0], done[0] )
-        twos = Choice(0, 270, 225, 30, '2s', selected_choice[1], possible[1], done[1] )
-        threes = Choice(0, 300, 225, 30, '3s', selected_choice[2], possible[2], done[2] )
-        fours = Choice(0, 330, 225, 30, '4s', selected_choice[3], possible[3], done[3] )
-        fives = Choice(0, 360, 225, 30, '5s', selected_choice[4], possible[4], done[4] )
-        sixes = Choice(0, 390, 225, 30, '6s', selected_choice[5], possible[5], done[5] )
-        uppersubt = Choice(0, 420, 225, 30, 'Upper Score', False, False, False )
-        upperbonus = Choice(0, 450, 225, 30, 'Bonus if 63+', False, False, True )
-        uppertotal = Choice(0, 480, 225, 30, 'Upper Total', False, False, True )
+        ones = Choice(0, 240, 225, 30, '1s', selected_choice[0], possible[0], done[0], score[0])
+        twos = Choice(0, 270, 225, 30, '2s', selected_choice[1], possible[1], done[1], score[1])
+        threes = Choice(0, 300, 225, 30, '3s', selected_choice[2], possible[2], done[2], score[2])
+        fours = Choice(0, 330, 225, 30, '4s', selected_choice[3], possible[3], done[3], score[3])
+        fives = Choice(0, 360, 225, 30, '5s', selected_choice[4], possible[4], done[4], score[4])
+        sixes = Choice(0, 390, 225, 30, '6s', selected_choice[5], possible[5], done[5], score[5])
+        uppersubt = Choice(0, 420, 225, 30, 'Upper Score', False, False, False, totals[0] )
+        upperbonus = Choice(0, 450, 225, 30, 'Bonus if 63+', False, False, True, totals[1] )
+        uppertotal = Choice(0, 480, 225, 30, 'Upper Total', False, False, True, totals[2] )
 
-        two_pair = Choice(0, 520, 225, 30, 'Two Pair', selected_choice[6], possible[6], done[6] )
-        three_kind = Choice(0, 550, 225, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7] )
-        four_kind = Choice(0, 580, 225, 30, 'Four of a Kind', selected_choice[8], possible[8], done[8] )
-        yachtzed = Choice(0, 740, 225, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9] )
-        full_house = Choice(0, 610, 225, 30, 'Full House', selected_choice[10], possible[10], done[10])
-        sm_straight = Choice(0, 640, 225, 30, 'Small Straight', selected_choice[11], possible[11], done[11] )
-        lg_straight = Choice(0, 670, 225, 30, 'Large Straight', selected_choice[12], possible[12], done[12] )
-        chance = Choice(0, 700, 225, 30, 'Chance', selected_choice[13], possible[13], done[13] )
-        lowersubt = Choice(0, 770, 225, 30, 'Lower Subtotal', False, False, False )
-        bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', False, False, False )
-        bonus2 = Choice(0, 830, 225, 30, 'Bonus Yachtzed', False, False, False )
-        grandtotal = Choice(0, 870, 225, 30, 'Grand Total', False, False, False )
+        two_pair = Choice(0, 520, 225, 30, 'Two Pair', selected_choice[6], possible[6], done[6], score[6])
+        three_kind = Choice(0, 550, 225, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7], score[7])
+        four_kind = Choice(0, 580, 225, 30, 'Four of a Kind', selected_choice[8], possible[8], done[8], score[8])
+        yachtzed = Choice(0, 740, 225, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9], score[9])
+        full_house = Choice(0, 610, 225, 30, 'Full House', selected_choice[10], possible[10], done[10], score[10])
+        sm_straight = Choice(0, 640, 225, 30, 'Small Straight', selected_choice[11], possible[11], done[11], score[11])
+        lg_straight = Choice(0, 670, 225, 30, 'Large Straight', selected_choice[12], possible[12], done[12], score[12])
+        chance = Choice(0, 700, 225, 30, 'Chance', selected_choice[13], possible[13], done[13], score[13])
+        lowersubt = Choice(0, 770, 225, 30, 'Lower Subtotal', False, False, False, totals[3] )
+        bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', False, False, False, totals[4] )
+        bonus2 = Choice(0, 830, 225, 30, 'Bonus Yachtzed', False, False, False, totals[5] )
+        grandtotal = Choice(0, 870, 225, 30, 'Grand Total', False, False, False, totals[6] )
 
         mouse_pos = pygame.mouse.get_pos()
 
@@ -438,7 +501,7 @@ def main():
                             clicked = 13
                         if 740 <= event.pos[1] <= 770:
                             clicked = 9
-                        selected_choice = make_choice[clicked, selected_choice, done]
+                        selected_choice = make_choice(clicked, selected_choice, done)
 
                 if roll_button.button.collidepoint(event.pos):
                     roll_button.pressed = True
@@ -457,6 +520,7 @@ def main():
             roll = False
         
         possible = check_possible(possible, numbers)
+        current_score = check_scores(selected_choice, numbers, possible, score)
 
         ones.draw()
         twos.draw()
