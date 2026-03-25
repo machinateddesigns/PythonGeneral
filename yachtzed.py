@@ -13,7 +13,7 @@ pygame.display.set_icon(game_icon)
 
 #screen width and height constants
 WIDTH = 600
-HEIGHT = 900
+HEIGHT = 860
 
 def col(color):
     #custom color list in json format with html color names as keys
@@ -55,6 +55,7 @@ background = burlywood
 
 #setting screen mode with width and height
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
+screen_center = (WIDTH // 2, HEIGHT // 2)
 #setting the title of the program window
 pygame.display.set_caption('Yachtzed!')
 #not sure exactly what this is doing, come back to it
@@ -76,8 +77,9 @@ font_m = pygame.font.Font('Open_Sans/static/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('Open_Sans/static/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('Open_Sans/static/OpenSans_Condensed-Regular.ttf', 18)
 
-numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
-
+#intiial numbers list. Might want to make them all blank
+#numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
+numbers = [0,0,0,0,0]
 
 #rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
 
@@ -87,10 +89,13 @@ selected_choice = [False, False, False, False, False, False, False, False, False
 possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-totals = [0,0,0,0,0,0,0]
+totals = [0,0,0,0,0,0]
 clicked = -1 #this might need to be global
 current_score = 0
 something_selected = False
+game_over = False
+turn_counter = 0
+global reset_button
 
 #creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
@@ -135,8 +140,12 @@ def draw_stuff():
     #accept_text = font_m.render('Accept Turn', True, white)    this is handled elsewhere
     #screen.blit(accept_text, (375, 167))                       again, I handled this better elsewhere
     #rolls_text = font_b.render(f'Rolls left this turn: {rolls_left}', True, white) #hide this for now
-    rolls_text = font_b.render(f'Rolls left this turn: {rolls_remaining}', True, white)
+    rolls_text = font_reg.render(f'Rolls left this turn:', True, darkgray)
     screen.blit(rolls_text, (10, 10))
+    rolls_rem_text = font_b.render(f'{rolls_remaining}', True, red)
+    screen.blit(rolls_rem_text, (170, 10))
+    inst_text = font_i.render(f'Click Dice to Keep or Release, Accept Turn to Score', True, white)
+    screen.blit(inst_text, (190, 10))
     pygame.draw.rect(screen, white, [0, 240, 225, HEIGHT - 200])
     pygame.draw.line(screen, black, (0, 40), (WIDTH, 40), 3)
     pygame.draw.line(screen, black, (0, 240), (WIDTH, 240), 3)
@@ -287,21 +296,15 @@ def check_totals(totals_list, score_list, bonus):
         totals_list[1] = 0
     totals_list[2] = totals_list[0] + totals_list[1]
     if bonus:
-        totals_list[3] = 100
+        totals_list[4] = 100
         bonus = False
-    if bonus == True and totals_list[3] == 100:
-        totals_list[4] += 100
-        bonus = False
-    totals_list[5] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + score_list[13] + totals_list[3] + totals_list[4]
-    totals_list[6] = totals_list[2] + totals_list[5]
+    totals_list[3] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + score_list[13] + totals_list[4]
+    totals_list[5] = totals_list[2] + totals_list[3]
     return totals_list, bonus
 
 def check_possible(possible_list, numbers_list):
     max_count = 0
     pairodice = 0
-    #needed for alternate way to check for full house
-    #has_three = False
-    #something is wrong with the logic. Try running it. Send it to claude.
     possible_list[0] = True #ones
     possible_list[1] = True #twos
     possible_list[2] = True #threes
@@ -316,13 +319,8 @@ def check_possible(possible_list, numbers_list):
             max_count = count
         if count == 2:
             pairodice += 1
-        #if count == 3:
-            #has_three = True
     
-    #Checks for 2 of more pairs of different dice
     possible_list[6] = pairodice >= 2
-    #this is an alternate way to check for a full house
-    #possible_list[10] = has_three and pairodice >= 1
 
     if max_count >= 3:
         possible_list[7] = True
@@ -378,6 +376,48 @@ def make_choice(clicked_num, selected, done_list):
         selected[clicked_num] = True #where I've left off 3/20/2026
     return selected
 
+def draw_outlined_text(screen, text, font, text_color, outline_color, x, y, outline_thickness=3):
+    # Render the outline text multiple times
+    outline_surface = font.render(text, True, outline_color)
+    
+    # Blit the outline surface in different directions
+    for dx in range(-outline_thickness, outline_thickness + 1):
+        for dy in range(-outline_thickness, outline_thickness + 1):
+            if dx != 0 or dy != 0:
+                screen.blit(outline_surface, (x + dx, y + dy))
+                
+    # Render the main text on top
+    text_surface = font.render(text, True, text_color)
+    screen.blit(text_surface, (x, y))
+
+def restart_button():
+    global possible
+    global selected_choice
+    global done
+    global score
+    global totals
+    global something_selected
+    global numbers
+    global game_over
+    global turn_counter
+    global rolls_remaining
+    global clicked
+    global current_score
+    global dice_selected
+    numbers = [0, -8, -10, -12, -8]
+    dice_selected = [False, False, False, False, False]
+    selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    totals = [0,0,0,0,0,0]
+    clicked = -1
+    current_score = 0
+    something_selected = False
+    game_over = False
+    turn_counter = 0
+    rolls_remaining = 3
+
 def main():
     global clicked #why not just make the original global?
     running = True
@@ -395,25 +435,31 @@ def main():
     global totals
     global something_selected
     global numbers
+    global game_over
+    global turn_counter
     bonus_time = False
     #Shake effect intialization for dice or other objects
     shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
     shakey = [0,0,0,0,0]
 
     #setting the roll button parameters
-    roll_text = f"Rolls Remaining: {rolls_remaining}"
-    roll_button = Button(5, 165, 200, 50, gray, 5, roll_text, font_m, black, 0)
+    roll_text = f"Roll Dice"
+    roll_button = Button(10, 165, 200, 50, gray, 5, roll_text, font_m, black, 0)
 
     #setting accept button parameters
     accept_text = f"Accept Turn"
-    accept_button = Button(240, 165, 200, 50, gray, 5, accept_text, font_m, black, 0)
+    accept_button = Button(220, 165, 200, 50, gray, 5, accept_text, font_m, black, 0)
+
+    reset_text = f"RESET"
+    reset_button = Button(430, 165, 160, 50, gray, 5, reset_text, font_b, black, 0)
 
     while running:
         
         timer.tick(fps)
         screen.fill(background)
         
-
+        #shake animation paired to sound mixer. Need a way to have this run only while
+        #a specific sound is playing
         if pygame.mixer.get_busy():
             
                 for x in range(len(shakex)):
@@ -446,11 +492,11 @@ def main():
         die5.draw()
     
         #Text for the roll button
-        roll_button.text = f"Rolls Remaining: {rolls_remaining}"
+        roll_button.text = f"Roll Dice"
 
         if roll_button.button and roll_button.button.collidepoint(mouse_pos):
             roll_button.color = lightgray  # hover color
-            roll_button.textcolor = darkgray
+            roll_button.textcolor = black
         else:
             roll_button.color = gray      # default color
             roll_button.textcolor = black
@@ -462,11 +508,29 @@ def main():
 
         if accept_button.button and accept_button.button.collidepoint(mouse_pos):
             accept_button.color = lightgray  # hover color
-            accept_button.textcolor = darkgray
+            accept_button.textcolor = black
         else:
             accept_button.color = gray      # default color
             accept_button.textcolor = black
         accept_button.draw()
+
+        #text for the reset button
+        if reset_button.button and reset_button.button.collidepoint(mouse_pos) and not game_over:
+            reset_button.text = f"RESET"
+            reset_button.color = red  # hover color
+            reset_button.textcolor = white
+        elif reset_button.button and reset_button.button.collidepoint(mouse_pos) and game_over:
+            reset_button.text = f"RESTART GAME"
+            reset_button.color = black  # hover color
+            reset_button.textcolor = gold
+        elif game_over:
+            reset_button.text = f"RESTART GAME"
+            reset_button.color = forestgreen  #default color
+            reset_button.textcolor = white
+        else:
+            reset_button.color = gray      # default color
+            reset_button.textcolor = black
+        reset_button.draw()
 
         draw_stuff()
 
@@ -476,7 +540,7 @@ def main():
         fours = Choice(0, 330, 225, 30, '4s', selected_choice[3], possible[3], done[3], score[3])
         fives = Choice(0, 360, 225, 30, '5s', selected_choice[4], possible[4], done[4], score[4])
         sixes = Choice(0, 390, 225, 30, '6s', selected_choice[5], possible[5], done[5], score[5])
-        uppersubt = Choice(0, 420, 225, 30, 'Upper Score', False, False, False, totals[0] )
+        uppersubt = Choice(0, 420, 225, 30, 'Upper Subtotal', False, False, False, totals[0] )
         upperbonus = Choice(0, 450, 225, 30, 'Bonus if 63+', False, False, True, totals[1] )
         uppertotal = Choice(0, 480, 225, 30, 'Upper Total', False, False, True, totals[2] )
 
@@ -490,8 +554,7 @@ def main():
         chance = Choice(0, 700, 225, 30, 'Chance', selected_choice[13], possible[13], done[13], score[13])
         lowersubt = Choice(0, 770, 225, 30, 'Lower Subtotal', False, False, False, totals[3] )
         bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', False, False, False, totals[4] )
-        bonus2 = Choice(0, 830, 225, 30, 'Bonus Yachtzed', False, False, False, totals[5] )
-        grandtotal = Choice(0, 870, 225, 30, 'Grand Total', False, False, False, totals[6] )
+        grandtotal = Choice(0, 830, 225, 30, 'Grand Total', False, False, False, totals[5] )
 
         mouse_pos = pygame.mouse.get_pos()
 
@@ -551,15 +614,21 @@ def main():
                             selected_choice[i] = False
                     for i in range(len(dice_selected)):
                         dice_selected[i] = False
-                    numbers = [0, -7, -9, -9, -8]
+                    numbers = [0, -8, -10, -12, -8]
                     something_selected = False
                     rolls_remaining = 3
+                    turn_counter += 1
+                if game_over == True:
+                    reset_button.text = f"RESTART GAME"
+                if reset_button.button.collidepoint(event.pos):
+                    restart_button()
+
 
             if event.type == pygame.MOUSEBUTTONUP:
                 if roll_button.pressed == True:
                     roll_button.pressed = False
         if roll:
-            dice_sounds = random.choice(["FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV","FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE2.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV"])
+            dice_sounds = random.choice(["FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV","FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV"])
             #for number in range(len(numbers)):
                 #numbers[number] = random.randint(1,6)
             #rolls_left -= 1
@@ -593,9 +662,61 @@ def main():
         lowersubt.draw()
 
         bonus1.draw()
-        bonus2.draw()
 
         grandtotal.draw()
+
+        if turn_counter == 0 and rolls_remaining == 3:
+            
+            bdsize = (500, 300)
+            backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2), bdsize[0], bdsize[1])
+            pygame.draw.rect(screen, black, backdrop, 0)
+
+            pygame.draw.rect(screen, forestgreen, backdrop, 10)
+
+            text1 = "Welcome To"
+            gamestarttext2 = font_h2.render(text1, True, black)
+            text_rect1 = gamestarttext2.get_rect() #fix the centering
+            text_rect1.centerx = screen_center[0]
+            text_rect1.centery = screen_center[1] - 72
+            draw_outlined_text(screen, text1, font_h2, black, gold, text_rect1.x, text_rect1.y)
+
+            text2 = "YACHTZED!"
+            gamestarttext2 = font_h1.render(text2, True, black)
+            text_rect2 = gamestarttext2.get_rect() #fix the centering
+            text_rect2.center = (WIDTH // 2, HEIGHT // 2)
+            draw_outlined_text(screen, text2, font_h1, white, forestgreen, text_rect2.x, text_rect2.y)
+
+            text3 = "Click Roll Dice to Start"
+            gamestarttext3 = font_h3.render(text3, True, black)
+            text_rect3 = gamestarttext3.get_rect() #fix the centering
+            text_rect3.centerx = screen_center[0]
+            text_rect3.centery = (screen_center[1] + 72)
+            draw_outlined_text(screen, text3, font_h3, black, gold, text_rect3.x, text_rect3.y)
+            
+            
+            #print(text_rect1.centery, text_rect2.centery, text_rect3.centery)
+
+        if turn_counter >= 14:
+            game_over = True
+
+        if game_over:
+            bdsize = (550, 200)
+            backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2), bdsize[0], bdsize[1])
+            pygame.draw.rect(screen, black, backdrop, 0)
+
+            pygame.draw.rect(screen, red, backdrop, 5)
+            
+            gameovertext1 = font_h1.render("Game Over", True, red)
+            text_rect = gameovertext1.get_rect() #fix the centering
+            text_rect.center = (screen_center[0], screen_center[1] - 36)
+            screen.blit(gameovertext1, text_rect)
+            
+            gameovertext2 = font_h3.render("Click Restart to Play Again", True, red)
+            text_rect = gameovertext2.get_rect() #fix the centering
+            text_rect.center = (screen_center[0], screen_center[1] + 36)
+            screen.blit(gameovertext2, text_rect)
+            
+
 
         pygame.display.flip()
 
