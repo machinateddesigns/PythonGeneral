@@ -3,12 +3,22 @@ import random
 #import time
 import json
 import pygame
+import sys
+import os
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 #initialization of pygame
 pygame.init()
 pygame.mixer.init()
 
-game_icon = pygame.image.load('dieicon.png')
+game_icon = pygame.image.load(resource_path('dieicon.png'))
+
 pygame.display.set_icon(game_icon)
 
 #screen width and height constants
@@ -17,7 +27,7 @@ HEIGHT = 860
 
 def col(color):
     #custom color list in json format with html color names as keys
-    colorspaceurl = "colorspace.json"
+    colorspaceurl = resource_path("colorspace.json")
     #load the json file
     try:
         with open(colorspaceurl, "r") as f:
@@ -628,7 +638,7 @@ def main():
                 if roll_button.pressed == True:
                     roll_button.pressed = False
         if roll:
-            dice_sounds = random.choice(["FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV","FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV", "FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV"])
+            dice_sounds = random.choice([resource_path("FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV"),resource_path("FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV"), resource_path("FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV")])
             #for number in range(len(numbers)):
                 #numbers[number] = random.randint(1,6)
             #rolls_left -= 1
