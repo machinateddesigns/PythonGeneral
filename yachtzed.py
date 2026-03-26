@@ -3,31 +3,31 @@ import random
 #import time
 import json
 import pygame
-import sys
-import os
+#import sys
+#import os
 
-def resource_path(relative_path):
+'''def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+    return os.path.join(base_path, relative_path)'''
 
 #initialization of pygame
 pygame.init()
 pygame.mixer.init()
 
-game_icon = pygame.image.load(resource_path('dieicon.png'))
+game_icon = pygame.image.load('IMAGES/dieicon.ico')
 
 pygame.display.set_icon(game_icon)
 
 #screen width and height constants
 WIDTH = 600
-HEIGHT = 860
+HEIGHT = 540
 
 def col(color):
     #custom color list in json format with html color names as keys
-    colorspaceurl = resource_path("colorspace.json")
+    colorspaceurl = "JSON/colorspace.json"
     #load the json file
     try:
         with open(colorspaceurl, "r") as f:
@@ -73,19 +73,20 @@ timer = pygame.time.Clock()
 #frames per second setting
 fps = 60
 #setting your standard fonts. I may add more of these so I'll give them different names
-font_reg = pygame.font.Font('Open_Sans/static/OpenSans-Regular.ttf', 18)
-font_title = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 96)
-font_h1 = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 72)
-font_h2 = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 48)
-font_h3 = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 36)
-font_h4 = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 24)
-font_h5 = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 20)
-font_h6 = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 16)
-font_i = pygame.font.Font('Open_Sans/static/OpenSans-Italic.ttf', 18)
-font_b = pygame.font.Font('Open_Sans/static/OpenSans-Bold.ttf', 18)
-font_m = pygame.font.Font('Open_Sans/static/OpenSans-Medium.ttf', 18)
-font_l = pygame.font.Font('Open_Sans/static/OpenSans-Light.ttf', 18)
-font_c = pygame.font.Font('Open_Sans/static/OpenSans_Condensed-Regular.ttf', 18)
+bold = 'FONTS/OpenSans-Bold.ttf'
+font_reg = pygame.font.Font('FONTS/OpenSans-Regular.ttf', 18)
+font_title = pygame.font.Font(bold, 96)
+font_h1 = pygame.font.Font(bold, 72)
+font_h2 = pygame.font.Font(bold, 48)
+font_h3 = pygame.font.Font(bold, 36)
+font_h4 = pygame.font.Font(bold, 24)
+font_h5 = pygame.font.Font(bold, 20)
+font_h6 = pygame.font.Font(bold, 16)
+font_i = pygame.font.Font('FONTS/OpenSans-Italic.ttf', 18)
+font_b = pygame.font.Font(bold, 18)
+font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
+font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
+font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
 
 #intiial numbers list. Might want to make them all blank
 #numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
@@ -156,11 +157,14 @@ def draw_stuff():
     screen.blit(rolls_rem_text, (170, 10))
     inst_text = font_i.render(f'Click Dice to Keep or Release, Accept Turn to Score', True, white)
     screen.blit(inst_text, (190, 10))
-    pygame.draw.rect(screen, white, [0, 240, 225, HEIGHT - 200])
+    pygame.draw.rect(screen, white, [0, 240, WIDTH, HEIGHT - 200])
     pygame.draw.line(screen, black, (0, 40), (WIDTH, 40), 3)
     pygame.draw.line(screen, black, (0, 240), (WIDTH, 240), 3)
-    pygame.draw.line(screen, black, (155, 240), (155, HEIGHT), 3)
-    pygame.draw.line(screen, black, (225, 240), (225, HEIGHT), 3)
+    pygame.draw.line(screen, black, (0, 240), (0, HEIGHT), 3)
+    pygame.draw.line(screen, black, ((WIDTH//2)-50, 240), ((WIDTH//2)-50, HEIGHT), 3)
+    pygame.draw.line(screen, black, (WIDTH//2, 240), (WIDTH//2, HEIGHT), 3)
+    pygame.draw.line(screen, black, (WIDTH-50, 240), (WIDTH-50, HEIGHT), 3)
+    
 
 #creating a button class so I don't need to do this over and over
 class Button:
@@ -185,7 +189,7 @@ class Button:
     #draws the button
     def draw(self):
         if self.pressed:
-            color = blue
+            color = forestgreen
             textcolor = white
         else:
             color = self.color
@@ -231,20 +235,20 @@ class Choice:
             possiblecolor = darkgray
         
         if self.select:
-            pygame.draw.rect(screen, gold, [self.x_pos, self.y_pos, 155, 30])
+            pygame.draw.rect(screen, gold, [self.x_pos+2, self.y_pos+2, (WIDTH//2)-53, 28])
 
         my_text = font_m.render(self.text, True, possiblecolor)
         if self.text == "Grand Total":
             my_text = font_b.render(self.text, True, possiblecolor)
         text_rect = my_text.get_rect()
         text_rect.centery = self.centery
-        text_rect.x = 10
+        text_rect.x = self.x_pos + 10
         screen.blit(my_text, text_rect)
 
         score_text = font_m.render(str(self.score), True, possiblecolor)
         text_rect = score_text.get_rect()
         text_rect.centery = self.centery
-        text_rect.x = 175
+        text_rect.x = self.x_pos + 260
         screen.blit(score_text, text_rect)
 
     def check_click(self, coords):
@@ -299,16 +303,16 @@ def check_scores(choice_list, numbers_list, possible_list, current_score):
     return current_score
 
 def check_totals(totals_list, score_list, bonus):
-    totals_list[0] = score_list[0] + score_list[1] + score_list[2] + score_list[3] + score_list[4] + score_list[5]
-    if totals_list[0] >= 63:
-        totals_list[1] = 35
+    totals_list[0] = score_list[0] + score_list[1] + score_list[2] + score_list[3] + score_list[4] + score_list[5] + score_list[13]
+    if totals_list[0] >= 80:
+        totals_list[1] = 40
     else:
         totals_list[1] = 0
     totals_list[2] = totals_list[0] + totals_list[1]
     if bonus:
         totals_list[4] = 100
         bonus = False
-    totals_list[3] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + score_list[13] + totals_list[4]
+    totals_list[3] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + totals_list[4]
     totals_list[5] = totals_list[2] + totals_list[3]
     return totals_list, bonus
 
@@ -544,27 +548,29 @@ def main():
 
         draw_stuff()
 
-        ones = Choice(0, 240, 225, 30, '1s', selected_choice[0], possible[0], done[0], score[0])
-        twos = Choice(0, 270, 225, 30, '2s', selected_choice[1], possible[1], done[1], score[1])
-        threes = Choice(0, 300, 225, 30, '3s', selected_choice[2], possible[2], done[2], score[2])
-        fours = Choice(0, 330, 225, 30, '4s', selected_choice[3], possible[3], done[3], score[3])
-        fives = Choice(0, 360, 225, 30, '5s', selected_choice[4], possible[4], done[4], score[4])
-        sixes = Choice(0, 390, 225, 30, '6s', selected_choice[5], possible[5], done[5], score[5])
-        uppersubt = Choice(0, 420, 225, 30, 'Upper Subtotal', False, False, False, totals[0] )
-        upperbonus = Choice(0, 450, 225, 30, 'Bonus if 63+', False, False, True, totals[1] )
-        uppertotal = Choice(0, 480, 225, 30, 'Upper Total', False, False, True, totals[2] )
+        ones = Choice(0, 240, WIDTH//2, 30, '1s', selected_choice[0], possible[0], done[0], score[0])
+        twos = Choice(0, 270, WIDTH//2, 30, '2s', selected_choice[1], possible[1], done[1], score[1])
+        threes = Choice(0, 300, WIDTH//2, 30, '3s', selected_choice[2], possible[2], done[2], score[2])
+        fours = Choice(0, 330, WIDTH//2, 30, '4s', selected_choice[3], possible[3], done[3], score[3])
+        fives = Choice(0, 360, WIDTH//2, 30, '5s', selected_choice[4], possible[4], done[4], score[4])
+        sixes = Choice(0, 390, WIDTH//2, 30, '6s', selected_choice[5], possible[5], done[5], score[5])
+        chance = Choice(0, 420, WIDTH//2, 30, 'Chance', selected_choice[13], possible[13], done[13], score[13])
 
-        two_pair = Choice(0, 520, 225, 30, 'Two Pair', selected_choice[6], possible[6], done[6], score[6])
-        three_kind = Choice(0, 550, 225, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7], score[7])
-        four_kind = Choice(0, 580, 225, 30, 'Four of a Kind', selected_choice[8], possible[8], done[8], score[8])
-        yachtzed = Choice(0, 740, 225, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9], score[9])
-        full_house = Choice(0, 610, 225, 30, 'Full House', selected_choice[10], possible[10], done[10], score[10])
-        sm_straight = Choice(0, 640, 225, 30, 'Small Straight', selected_choice[11], possible[11], done[11], score[11])
-        lg_straight = Choice(0, 670, 225, 30, 'Large Straight', selected_choice[12], possible[12], done[12], score[12])
-        chance = Choice(0, 700, 225, 30, 'Chance', selected_choice[13], possible[13], done[13], score[13])
-        lowersubt = Choice(0, 770, 225, 30, 'Lower Subtotal', False, False, False, totals[3] )
-        bonus1 = Choice(0, 800, 225, 30, 'Bonus Yachtzed', False, False, False, totals[4] )
-        grandtotal = Choice(0, 830, 225, 30, 'Grand Total', False, False, False, totals[5] )
+        uppersubt = Choice(0, 450, WIDTH//2, 30, 'Upper Subtotal', False, False, True, totals[0] )
+        upperbonus = Choice(0, 480, WIDTH//2, 30, 'Bonus if 80+', False, False, True, totals[1] )
+        uppertotal = Choice(0, 510, WIDTH//2, 30, 'Upper Total', False, False, True, totals[2] )
+
+        two_pair = Choice(WIDTH//2, 240, WIDTH, 30, 'Two Pair', selected_choice[6], possible[6], done[6], score[6])
+        three_kind = Choice(WIDTH//2, 270, WIDTH, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7], score[7])
+        four_kind = Choice(WIDTH//2, 300, WIDTH, 30, 'Four of a Kind', selected_choice[8], possible[8], done[8], score[8])
+        yachtzed = Choice(WIDTH//2, 420, WIDTH, 30, 'YACHTZED!', selected_choice[9], possible[9], done[9], score[9])
+        full_house = Choice(WIDTH//2, 330, WIDTH, 30, 'Full House', selected_choice[10], possible[10], done[10], score[10])
+        sm_straight = Choice(WIDTH//2, 360, WIDTH, 30, 'Small Straight', selected_choice[11], possible[11], done[11], score[11])
+        lg_straight = Choice(WIDTH//2, 390, WIDTH, 30, 'Large Straight', selected_choice[12], possible[12], done[12], score[12])
+        
+        lowersubt = Choice(WIDTH//2, 450, WIDTH, 30, 'Lower Subtotal', False, False, True, totals[3] )
+        bonus1 = Choice(WIDTH//2, 480, WIDTH, 30, 'Bonus Yachtzed', False, False, True, totals[4] )
+        grandtotal = Choice(WIDTH//2, 510, WIDTH, 30, 'Grand Total', False, False, False, totals[5] )
 
         mouse_pos = pygame.mouse.get_pos()
 
@@ -577,8 +583,8 @@ def main():
                 die3.check_click(event.pos)
                 die4.check_click(event.pos)
                 die5.check_click(event.pos)
-                if 0 <= event.pos[0] <= 155:
-                    if 240 <= event.pos[1] <= 420 or 520 <= event.pos[1] <= 730 or 740 <= event.pos[1] <= 770:
+                if 0 <= event.pos[0] <= WIDTH//2:
+                    if 240 <= event.pos[1] <= 450:
                         if 240 <= event.pos[1] <= 270:
                             clicked = 0
                         if 270 <= event.pos[1] <= 300:
@@ -591,23 +597,28 @@ def main():
                             clicked = 4
                         if 390 <= event.pos[1] <= 420:
                             clicked = 5
-
-                        if 520 <= event.pos[1] <= 550:
-                            clicked = 6
-                        if 550 <= event.pos[1] <= 580:
-                            clicked = 7
-                        if 580 <= event.pos[1] <= 610:
-                            clicked = 8
-                        if 610 <= event.pos[1] <= 640:
-                            clicked = 10
-                        if 640 <= event.pos[1] <= 670:
-                            clicked = 11
-                        if 670 <= event.pos[1] <= 700:
-                            clicked = 12
-                        if 700 <= event.pos[1] <= 730:
+                        if 420 <= event.pos[1] <= 450:
                             clicked = 13
-                        if 740 <= event.pos[1] <= 770:
+                        
+                        selected_choice = make_choice(clicked, selected_choice, done)
+
+                if WIDTH//2 < event.pos[0] <= WIDTH:
+                    if 240 <= event.pos[1] <= 450:
+                        if 240 <= event.pos[1] <= 270:
+                            clicked = 6
+                        if 270 <= event.pos[1] <= 300:
+                            clicked = 7
+                        if 300 <= event.pos[1] <= 330:
+                            clicked = 8
+                        if 330 <= event.pos[1] <= 360:
+                            clicked = 10
+                        if 360 <= event.pos[1] <= 390:
+                            clicked = 11
+                        if 390 <= event.pos[1] <= 420:
+                            clicked = 12
+                        if 420 <= event.pos[1] <= 450:
                             clicked = 9
+
                         selected_choice = make_choice(clicked, selected_choice, done)
 
                 if roll_button.button.collidepoint(event.pos):
@@ -615,6 +626,7 @@ def main():
                     if rolls_remaining > 0:
                         roll = True
                 if accept_button.button.collidepoint(event.pos) and something_selected and rolls_remaining < 3:
+                    accept_button.pressed = True
                     if score[11] == 50 and done[11] and possible[11]:
                         bonus_time = True
                     for i in range(len(selected_choice)):
@@ -631,14 +643,17 @@ def main():
                 if game_over == True:
                     reset_button.text = f"RESTART GAME"
                 if reset_button.button.collidepoint(event.pos):
+                    reset_button.pressed = True
                     restart_button()
 
 
             if event.type == pygame.MOUSEBUTTONUP:
-                if roll_button.pressed == True:
+                if roll_button.pressed or accept_button.pressed or reset_button.pressed:
                     roll_button.pressed = False
+                    accept_button.pressed = False
+                    reset_button.pressed = False
         if roll:
-            dice_sounds = random.choice([resource_path("FX/MORESNDS/8BIT/CASINO/BACKROLL.WAV"),resource_path("FX/MORESNDS/8BIT/CASINO/SHAKE1.WAV"), resource_path("FX/MORESNDS/8BIT/CASINO/SHAKE3.WAV")])
+            dice_sounds = random.choice(["FX/BACKROLL.WAV","FX/SHAKE1.WAV","FX/SHAKE3.WAV"])
             #for number in range(len(numbers)):
                 #numbers[number] = random.randint(1,6)
             #rolls_left -= 1
@@ -677,8 +692,8 @@ def main():
 
         if turn_counter == 0 and rolls_remaining == 3:
             
-            bdsize = (500, 300)
-            backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2), bdsize[0], bdsize[1])
+            bdsize = (600, 301)
+            backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2) + 119, bdsize[0], bdsize[1])
             pygame.draw.rect(screen, black, backdrop, 0)
 
             pygame.draw.rect(screen, forestgreen, backdrop, 10)
@@ -687,47 +702,42 @@ def main():
             gamestarttext2 = font_h2.render(text1, True, black)
             text_rect1 = gamestarttext2.get_rect() #fix the centering
             text_rect1.centerx = screen_center[0]
-            text_rect1.centery = screen_center[1] - 72
+            text_rect1.centery = screen_center[1] - 72  + 120
             draw_outlined_text(screen, text1, font_h2, black, gold, text_rect1.x, text_rect1.y)
 
             text2 = "YACHTZED!"
             gamestarttext2 = font_h1.render(text2, True, black)
             text_rect2 = gamestarttext2.get_rect() #fix the centering
-            text_rect2.center = (WIDTH // 2, HEIGHT // 2)
+            text_rect2.center = (WIDTH // 2, (HEIGHT // 2) + 120)
             draw_outlined_text(screen, text2, font_h1, white, forestgreen, text_rect2.x, text_rect2.y)
 
             text3 = "Click Roll Dice to Start"
             gamestarttext3 = font_h3.render(text3, True, black)
             text_rect3 = gamestarttext3.get_rect() #fix the centering
             text_rect3.centerx = screen_center[0]
-            text_rect3.centery = (screen_center[1] + 72)
+            text_rect3.centery = (screen_center[1] + 72  + 120)
             draw_outlined_text(screen, text3, font_h3, black, gold, text_rect3.x, text_rect3.y)
-            
-            
-            #print(text_rect1.centery, text_rect2.centery, text_rect3.centery)
 
         if turn_counter >= 14:
             game_over = True
 
         if game_over:
-            bdsize = (550, 200)
-            backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2), bdsize[0], bdsize[1])
+            bdsize = (WIDTH, 213)
+            backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2) + 75, bdsize[0], bdsize[1])
             pygame.draw.rect(screen, black, backdrop, 0)
 
             pygame.draw.rect(screen, red, backdrop, 5)
             
             gameovertext1 = font_h1.render("Game Over", True, red)
             text_rect = gameovertext1.get_rect() #fix the centering
-            text_rect.center = (screen_center[0], screen_center[1] - 36)
+            text_rect.center = (screen_center[0], screen_center[1] + 39)
             screen.blit(gameovertext1, text_rect)
             
             gameovertext2 = font_h3.render("Click Restart to Play Again", True, red)
             text_rect = gameovertext2.get_rect() #fix the centering
-            text_rect.center = (screen_center[0], screen_center[1] + 36)
+            text_rect.center = (screen_center[0], screen_center[1] + 111)
             screen.blit(gameovertext2, text_rect)
             
-
-
         pygame.display.flip()
 
     pygame.quit()
