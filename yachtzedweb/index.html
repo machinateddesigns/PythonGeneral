@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yachtzed - Download Now</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: burlywood;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .splash-image {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #228B22 0%, #dc143c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #000;
+            margin-bottom: 15px;
+            font-size: 32px;
+        }
+
+        p {
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background-color: #228B22;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: 2px solid #228B22;
+        }
+
+        .download-btn:hover {
+            background-color: transparent;
+            color: #228B22;
+        }
+
+        .accent-red {
+            color: #dc143c;
+        }
+
+        .accent-green {
+            color: #228B22;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .splash-image {
+                height: 100%;
+                font-size: 36px;
+            }
+
+            .download-btn {
+                padding: 12px 30px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="splash-image">
+            <img src="IMAGES/splash.png" />
+        </div>
+        <div class="content">
+            <h1>Welcome to <span class="accent-green">Yacht</span><span class="accent-red">zed</span></h1>
+            <p>Thank you for coming to check out Yachtzed, a yahtzee clone (with a few changes) created in python using pygame and ready for play on windows. Download the ZIP file and unpack it, then open the file yachtzed.exe to run.</p>
+            <a href="yachtzed.zip" download class="download-btn">Download Yachtzed.zip</a>
+        </div>
+    </div>
+</body>
+</html>
