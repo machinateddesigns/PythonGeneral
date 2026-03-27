@@ -1,65 +1,33 @@
 #imports
 import asyncio
 import random
-#import time
-import json
 import pygame
-#import sys
-#import os
-
-'''def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)'''
 
 #initialization of pygame
 pygame.init()
 pygame.mixer.init()
 
-game_icon = pygame.image.load('IMAGES/dieicon.ico')
-
-pygame.display.set_icon(game_icon)
-
 #screen width and height constants
 WIDTH = 600
 HEIGHT = 540
 
-def col(color):
-    #custom color list in json format with html color names as keys
-    colorspaceurl = "JSON/colorspace.json"
-    #load the json file
-    try:
-        with open(colorspaceurl, "r") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: The file '{colorspaceurl}' was not found.")
-    except json.JSONDecodeError:
-        print(f"Error: Failed to decode JSON from the file. Check if the JSON is valid.")
-    except KeyError as e:
-        print(f"Error: Missing key in JSON Data: {e}")
-    return data[color]
-
-#syntax for direct access of colors data["Gray"]
-
 #colors
-black = tuple(col("Black"))
-white = tuple(col("White"))
-red = tuple(col("Red"))
-green = tuple(col("Green"))
-blue = tuple(col("Blue"))
-yellow = tuple(col("Yellow"))
-orange = tuple(col("Orange"))
-purple = tuple(col("Purple"))
-gray = tuple(col("Gray"))
-darkgray = tuple(col("DarkGray"))
-lightgray = tuple(col("LightGray"))
-brown = tuple(col("Brown"))
-burlywood = tuple(col("Burlywood"))
-brickred = tuple(col("Firebrick"))
-forestgreen = tuple(col("ForestGreen"))
-gold = tuple(col("Gold"))
+black = (0,0,0)
+white = (255,255,255)
+red = (255,0,0)
+green = (0,255,0)
+blue = (0,0,255)
+yellow = (255,255,0)
+orange = (255,165,0)
+purple = (128,0,128)
+gray = (128,128,128)
+darkgray = (105,105,105)
+lightgray = (211,211,211)
+brown = (165, 42, 42)
+burlywood = (222, 184, 135)
+brickred = (178, 34, 34)
+forestgreen = (34, 139, 34)
+gold = (255, 215, 0)
 
 #background color can be set from above colors
 background = burlywood
@@ -73,27 +41,18 @@ pygame.display.set_caption('Yachtzed!')
 timer = pygame.time.Clock()
 #frames per second setting
 fps = 60
-#setting your standard fonts. I may add more of these so I'll give them different names
-bold = 'FONTS/OpenSans-Bold.ttf'
-font_reg = pygame.font.Font('FONTS/OpenSans-Regular.ttf', 18)
-font_title = pygame.font.Font(bold, 96)
-font_h1 = pygame.font.Font(bold, 72)
-font_h2 = pygame.font.Font(bold, 48)
-font_h3 = pygame.font.Font(bold, 36)
-font_h4 = pygame.font.Font(bold, 24)
-font_h5 = pygame.font.Font(bold, 20)
-font_h6 = pygame.font.Font(bold, 16)
-font_i = pygame.font.Font('FONTS/OpenSans-Italic.ttf', 18)
-font_b = pygame.font.Font(bold, 18)
-font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
-font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
-font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
 
-#intiial numbers list. Might want to make them all blank
-#numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
+font_reg = pygame.font.Font(None, 24)
+font_title = pygame.font.Font(None, 96)
+font_h1 = pygame.font.Font(None, 72)
+font_h2 = pygame.font.Font(None, 48)
+font_h3 = pygame.font.Font(None, 36)
+font_i = pygame.font.Font(None, 24)
+font_b = pygame.font.Font(None, 24)
+font_m = pygame.font.Font(None, 24)
+
+
 numbers = [0,0,0,0,0]
-
-#rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
 
 dice_selected = [False, False, False, False, False]
 
@@ -102,14 +61,13 @@ possible = [False, False, False, False, False, False, False, False, False, False
 done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 totals = [0,0,0,0,0,0]
-clicked = -1 #this might need to be global
+clicked = -1 
 current_score = 0
 something_selected = False
 game_over = False
 turn_counter = 0
 global reset_button
 
-#creating a Dice class so we can call multiple of them with different pip counts. This version is for a standard 6 sided die.
 class Dice:
     def __init__(self, x_pos, y_pos, num_pip, key):
         global dice_selected
@@ -145,13 +103,7 @@ class Dice:
                 dice_selected[self.key] = True
 
 def draw_stuff():
-    #global rolls_left #just in case I want to separate the rolls left from the roll button
-    #global rolls_remaining #my own spin on it, see if this works, looks like it's unnecessary
-    #roll_text = font_b.render('Click to Roll', True, white)    this is handled elsewhere in my version
-    #screen.blit(roll_text, (85, 167))                          this is handled more cleanly elsewhere
-    #accept_text = font_m.render('Accept Turn', True, white)    this is handled elsewhere
-    #screen.blit(accept_text, (375, 167))                       again, I handled this better elsewhere
-    #rolls_text = font_b.render(f'Rolls left this turn: {rolls_left}', True, white) #hide this for now
+    
     rolls_text = font_reg.render(f'Rolls left this turn:', True, darkgray)
     screen.blit(rolls_text, (10, 10))
     rolls_rem_text = font_b.render(f'{rolls_remaining}', True, red)
@@ -174,12 +126,11 @@ class Button:
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.color = color #tuple(col(color))
+        self.color = color 
         self.padding = padding
         self.text = text
         self.font = font
-        self.textcolor = textcolor #tuple(col(textcolor))
-        #self.action = action  // should this become necessary later on
+        self.textcolor = textcolor 
         self.key = key
         self.pressed = False
         self.outline = ''
@@ -220,7 +171,6 @@ class Choice:
         self.possible = possible
         self.done = done
         self.score = score
-        #self.centerx = (self.width // 2) + x_pos
         self.centery = (self.height // 2) + y_pos
     
     def draw(self):
@@ -405,6 +355,17 @@ def draw_outlined_text(screen, text, font, text_color, outline_color, x, y, outl
     text_surface = font.render(text, True, text_color)
     screen.blit(text_surface, (x, y))
 
+def shakedice(shakex, shakey):
+    for x in range(len(shakex)):
+        if not dice_selected[x]:
+            shakex[x] = random.randint(-3,3)
+    for y in range(len(shakey)):
+        if not dice_selected[y]:
+            shakey[y] = random.randint(-3,3)
+    for number in range(len(numbers)):
+        if not dice_selected[number]:
+            numbers[number] = random.randint(1,6)
+
 def restart_button():
     global possible
     global selected_choice
@@ -434,14 +395,13 @@ def restart_button():
     rolls_remaining = 3
 
 async def main():
-    global clicked #why not just make the original global?
+    global clicked
     running = True
     roll = False
     #globalize the variable
     global rolls_remaining
     #local rolls variable
     rolls_remaining = 3 #3
-    #Loading dice sounds
     #need to load possible as a global variable before it's used or redefined
     global possible
     global selected_choice
@@ -472,23 +432,9 @@ async def main():
         
         timer.tick(fps)
         screen.fill(background)
-        
+        current_time = pygame.time.get_ticks()
         #shake animation paired to sound mixer. Need a way to have this run only while
         #a specific sound is playing
-        if pygame.mixer.get_busy():
-            
-                for x in range(len(shakex)):
-                    if not dice_selected[x]:
-                        shakex[x] = random.randint(-3,3)
-                for y in range(len(shakey)):
-                    if not dice_selected[y]:
-                        shakey[y] = random.randint(-3,3)
-                for number in range(len(numbers)):
-                    if not dice_selected[number]:
-                        numbers[number] = random.randint(1,6)
-        else:
-            shakex = [0,0,0,0,0]
-            shakey = [0,0,0,0,0]
 
         if True in selected_choice:
             something_selected = True
@@ -623,9 +569,13 @@ async def main():
                         selected_choice = make_choice(clicked, selected_choice, done)
 
                 if roll_button.button.collidepoint(event.pos):
-                    roll_button.pressed = True
-                    if rolls_remaining > 0:
-                        roll = True
+                    
+                    if not roll:
+                        roll_button.pressed = True
+                        roll_start = current_time
+                        roll_duration = random.randint(500,1000)
+                        if rolls_remaining > 0:
+                            roll = True
                 if accept_button.button.collidepoint(event.pos) and something_selected and rolls_remaining < 3:
                     accept_button.pressed = True
                     if score[11] == 50 and done[11] and possible[11]:
@@ -654,13 +604,12 @@ async def main():
                     accept_button.pressed = False
                     reset_button.pressed = False
         if roll:
-            dice_sounds = random.choice(["FX/BACKROLL.WAV","FX/SHAKE1.WAV","FX/SHAKE3.WAV"])
-            #for number in range(len(numbers)):
-                #numbers[number] = random.randint(1,6)
-            #rolls_left -= 1
-            rolls_remaining -= 1
-            pygame.mixer.Sound(dice_sounds).play()
-            roll = False
+            shakedice(shakex, shakey)
+            if current_time - roll_start >= roll_duration:
+                rolls_remaining -= 1
+                roll = False
+                shakex = [0,0,0,0,0]
+                shakey = [0,0,0,0,0]
         
         possible = check_possible(possible, numbers)
         current_score = check_scores(selected_choice, numbers, possible, score)
