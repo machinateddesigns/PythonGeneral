@@ -63,6 +63,8 @@ orientation = portrait
 #
 # author = ©James Monty-Carbonari, Machinated Games
 
+#paused here, added this line and one for space. Need to do this in WSL2
+
 # change the major version of python used by the app
 osx.python_version = 3
 

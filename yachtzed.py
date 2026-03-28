@@ -347,6 +347,7 @@ def check_possible(possible_list, numbers_list):
         for index in range(len(numbers_list)):
             if numbers_list.count(numbers_list[index]) == 2:
                 possible_list[10] = True
+                possible_list[6] = True
                 checker = True
         if not checker:
             possible_list[10] = False
@@ -644,7 +645,7 @@ def main():
                     accept_button.pressed = False
                     reset_button.pressed = False
         if roll:
-            dice_sounds = random.choice(["FX/BACKROLL.WAV","FX/SHAKE1.WAV","FX/SHAKE3.WAV"])
+            dice_sounds = random.choice(["FX/BACKROLL.ogg","FX/SHAKE1.ogg","FX/SHAKE3.ogg"])
             #for number in range(len(numbers)):
                 #numbers[number] = random.randint(1,6)
             #rolls_left -= 1
