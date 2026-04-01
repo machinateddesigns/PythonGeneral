@@ -78,7 +78,6 @@ font_b = pygame.font.Font(bold, 18)
 font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
-font_wing = pygame.font.Font('wingdings.ttf', 75)
 
 #intiial numbers list. Might want to make them all blank
 #numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
@@ -119,7 +118,7 @@ class Dice:
         self.die = ''
 
     def draw(self):
-        self.die = pygame.draw.rect(screen, die_colors[self.key], [self.x_pos, self.y_pos, 100, 100], 0, 5)
+        self.die = pygame.draw.rect(screen, white, [self.x_pos, self.y_pos, 100, 100], 0, 5)
         if self.number % 2 == 1:
             pygame.draw.circle(screen, black, (self.x_pos + 50, self.y_pos + 50), 10)
         if self.number > 1:
@@ -440,9 +439,7 @@ def restart_button():
     global clicked
     global current_score
     global dice_selected
-    global die_colors
     numbers = [0, -8, -10, -12, -8]
-    die_colors = [white, white, white, white, white]
     dice_selected = [False, False, False, False, False]
     selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
     possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
@@ -483,9 +480,7 @@ async def main():
     global music_volume
     global fx_muted
     global fx_volume
-    global die_colors
     bonus_time = False
-    col_opt = [red, blue, yellow, green]
 
     #Shake effect intialization for dice or other objects
     shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
@@ -526,7 +521,6 @@ async def main():
                 for number in range(len(numbers)):
                     if not dice_selected[number]:
                         numbers[number] = random.randint(1,6)
-                        die_colors[number] = random.choice(col_opt)
         else:
             shakex = [0,0,0,0,0]
             shakey = [0,0,0,0,0]
