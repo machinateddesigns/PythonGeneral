@@ -14,7 +14,7 @@ pygame.display.set_icon(game_icon)
 
 #screen width and height constants
 WIDTH = 600
-HEIGHT = 540
+HEIGHT = 700
 
 def col(color):
     #custom color list in json format with html color names as keys
@@ -78,6 +78,7 @@ font_b = pygame.font.Font(bold, 18)
 font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
+font_suits = pygame.font.Font('suits.ttf', 72)
 
 #intiial numbers list. Might want to make them all blank
 #numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
@@ -85,14 +86,16 @@ numbers = [0,0,0,0,0]
 
 die_colors = [white, white, white, white, white]
 
+suits = ['s','s','s','s','s']
+
 #rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
 
 dice_selected = [False, False, False, False, False]
 
-selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 totals = [0,0,0,0,0,0]
 clicked = -1 #this might need to be global
 current_score = 0
@@ -110,26 +113,29 @@ fx_muted = False
 class Dice:
     def __init__(self, x_pos, y_pos, num_pip, key):
         global dice_selected
+        global die_colors
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.number = num_pip
         self.key = key
+        self.color = die_colors[key]
+        self.pip_color = white if self.color != yellow else black
         self.selected = dice_selected[key]
         self.die = ''
 
     def draw(self):
-        self.die = pygame.draw.rect(screen, white, [self.x_pos, self.y_pos, 100, 100], 0, 5)
+        self.die = pygame.draw.rect(screen, die_colors[self.key], [self.x_pos, self.y_pos, 100, 100], 0, 5)
         if self.number % 2 == 1:
-            pygame.draw.circle(screen, black, (self.x_pos + 50, self.y_pos + 50), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 50, self.y_pos + 50), 10)
         if self.number > 1:
-            pygame.draw.circle(screen, black, (self.x_pos + 25, self.y_pos + 25), 10)
-            pygame.draw.circle(screen, black, (self.x_pos + 75, self.y_pos + 75), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 25, self.y_pos + 25), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 75, self.y_pos + 75), 10)
         if self.number > 3:
-            pygame.draw.circle(screen, black, (self.x_pos + 25, self.y_pos + 75), 10)
-            pygame.draw.circle(screen, black, (self.x_pos + 75, self.y_pos + 25), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 25, self.y_pos + 75), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 75, self.y_pos + 25), 10)
         if self.number == 6:
-            pygame.draw.circle(screen, black, (self.x_pos + 25, self.y_pos + 50), 10)
-            pygame.draw.circle(screen, black, (self.x_pos + 75, self.y_pos + 50), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 25, self.y_pos + 50), 10)
+            pygame.draw.circle(screen, self.pip_color, (self.x_pos + 75, self.y_pos + 50), 10)
 
         if self.selected:
             pygame.draw.rect(screen, forestgreen, [self.x_pos, self.y_pos, 100, 100], 5, 5)
@@ -314,9 +320,11 @@ def check_totals(totals_list, score_list, bonus):
     totals_list[5] = totals_list[2] + totals_list[3]
     return totals_list, bonus
 
-def check_possible(possible_list, numbers_list):
+def check_possible(possible_list, numbers_list, colors_list):
     max_count = 0
+    max_color_count = 0
     pairodice = 0
+
     if 1 in numbers_list:
         possible_list[0] = True #ones
     else:
@@ -343,6 +351,27 @@ def check_possible(possible_list, numbers_list):
         possible_list[5] = False #sixes
     
     possible_list[13] = True #chance
+
+    if red in colors_list:
+        possible_list[14] = True #reds
+    else:
+        possible_list[14] = False #reds
+    if blue in colors_list:
+        possible_list[15] = True #blues
+    else:
+        possible_list[15] = False #blues
+    if yellow in colors_list:
+        possible_list[16] = True #yellows
+    else:
+        possible_list[16] = False #yellows
+    if green in colors_list:
+        possible_list[17] = True #greens
+    else:
+        possible_list[17] = False #greens
+    if purple in colors_list:
+        possible_list[18] = True #purples
+    else:
+        possible_list[18] = False #purples
 
     for index in range(1,7):
         count = numbers_list.count(index)
@@ -402,6 +431,14 @@ def check_possible(possible_list, numbers_list):
     else:
         possible_list[11] = False
 
+    for index in colors_list:
+        colors_count = colors_list.count(colors_list[index])
+        if colors_count > max_color_count:
+            max_color_count = colors_count
+    
+
+
+
     return possible_list
 
 def make_choice(clicked_num, selected, done_list):
@@ -439,7 +476,9 @@ def restart_button():
     global clicked
     global current_score
     global dice_selected
+    global die_colors
     numbers = [0, -8, -10, -12, -8]
+    die_colors = [white, white, white, white, white]
     dice_selected = [False, False, False, False, False]
     selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
     possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
@@ -480,7 +519,9 @@ async def main():
     global music_volume
     global fx_muted
     global fx_volume
+    global die_colors
     bonus_time = False
+    col_opt = [red, blue, yellow, green, purple]
 
     #Shake effect intialization for dice or other objects
     shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
@@ -521,6 +562,7 @@ async def main():
                 for number in range(len(numbers)):
                     if not dice_selected[number]:
                         numbers[number] = random.randint(1,6)
+                        die_colors[number] = random.choice(col_opt)
         else:
             shakex = [0,0,0,0,0]
             shakey = [0,0,0,0,0]
@@ -612,6 +654,13 @@ async def main():
         sixes = Choice(0, 390, WIDTH//2, 30, '6s', selected_choice[5], possible[5], done[5], current_score if selected_choice[5] and not done[5] else score[5])
         chance = Choice(0, 420, WIDTH//2, 30, 'Chance', selected_choice[13], possible[13], done[13], current_score if selected_choice[13] and not done[13] else score[13])
 
+        reds = 
+        yellows =
+        blues = 
+        greens = 
+        purples =
+        pallete = 
+
         uppersubt = Choice(0, 450, WIDTH//2, 30, 'Upper Subtotal', False, False, True, totals[0] )
         upperbonus = Choice(0, 480, WIDTH//2, 30, 'Bonus if 80+', False, False, True, totals[1] )
         uppertotal = Choice(0, 510, WIDTH//2, 30, 'Upper Total', False, False, True, totals[2] )
@@ -623,10 +672,17 @@ async def main():
         full_house = Choice(WIDTH//2, 330, WIDTH, 30, 'Full House', selected_choice[10], possible[10], done[10], current_score if selected_choice[10] and not done[10] else score[10])
         sm_straight = Choice(WIDTH//2, 360, WIDTH, 30, 'Small Straight', selected_choice[11], possible[11], done[11], current_score if selected_choice[11] and not done[11] else score[11])
         lg_straight = Choice(WIDTH//2, 390, WIDTH, 30, 'Large Straight', selected_choice[12], possible[12], done[12], current_score if selected_choice[12] and not done[12] else score[12])
-        
+
+        rainbow = 
+        flush = 
+        straight_flush = 
+        yacht_flush = 
+
         lowersubt = Choice(WIDTH//2, 450, WIDTH, 30, 'Lower Subtotal', False, False, True, totals[3] )
         bonus1 = Choice(WIDTH//2, 480, WIDTH, 30, 'Bonus Yachtzed', False, False, True, totals[4] )
         grandtotal = Choice(WIDTH//2, 510, WIDTH, 30, 'Grand Total', False, False, False, totals[5] )
+
+
 
         mouse_pos = pygame.mouse.get_pos()
 

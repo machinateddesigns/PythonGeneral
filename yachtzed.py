@@ -358,6 +358,7 @@ def check_possible(possible_list, numbers_list):
             possible_list[6] = True
             if max_count == 5:
                 possible_list[9] = True
+                possible_list[10] = True
 
     if max_count < 3:
         possible_list[7] = False
@@ -379,6 +380,7 @@ def check_possible(possible_list, numbers_list):
     
     if max_count == 4:
         possible_list[9] = False
+        possible_list[10] = False
 
     lowest = 10
     highest = 0
