@@ -14,7 +14,7 @@ pygame.display.set_icon(game_icon)
 
 #screen width and height constants
 WIDTH = 600
-HEIGHT = 700
+HEIGHT = 840
 
 def col(color):
     #custom color list in json format with html color names as keys
@@ -50,6 +50,17 @@ burlywood = tuple(col("Burlywood"))
 brickred = tuple(col("Firebrick"))
 forestgreen = tuple(col("ForestGreen"))
 gold = tuple(col("Gold"))
+magenta = tuple(col("Magenta"))
+cyan = tuple(col("Cyan"))
+lime = tuple(col("Lime"))
+darkgreen = tuple(col("DarkGreen"))
+crimson = tuple(col("Crimson"))
+darkred = tuple(col("DarkRed"))
+indianred = tuple(col("IndianRed"))
+tomato = tuple(col("Tomato"))
+darkviolet = tuple(col("DarkViolet"))
+indigo = tuple(col("Indigo"))
+
 
 #background color can be set from above colors
 background = burlywood
@@ -78,7 +89,7 @@ font_b = pygame.font.Font(bold, 18)
 font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
-font_suits = pygame.font.Font('suits.ttf', 72)
+font_suits = pygame.font.Font('FONTS/suits.ttf', 96)
 
 #intiial numbers list. Might want to make them all blank
 #numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
@@ -86,16 +97,16 @@ numbers = [0,0,0,0,0]
 
 die_colors = [white, white, white, white, white]
 
-suits = ['s','s','s','s','s']
+die_suits = [' ',' ',' ',' ',' ']
 
 #rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
 
 dice_selected = [False, False, False, False, False]
 
-selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 totals = [0,0,0,0,0,0]
 clicked = -1 #this might need to be global
 current_score = 0
@@ -114,17 +125,34 @@ class Dice:
     def __init__(self, x_pos, y_pos, num_pip, key):
         global dice_selected
         global die_colors
+        global die_suits
+        self.diewidth = 100
+        self.dieheight = 100
         self.x_pos = x_pos
         self.y_pos = y_pos
+        self.centerx = x_pos + self.diewidth // 2
+        self.centery = y_pos + self.dieheight // 2
+        self.center = (self.centerx, self.centery)
         self.number = num_pip
         self.key = key
         self.color = die_colors[key]
-        self.pip_color = white if self.color != yellow else black
+        self.suit = die_suits[key]
+        self.pip_color = black
+        self.pip_color_rev = gold if self.color == yellow else darkviolet if self.color == purple else self.color
         self.selected = dice_selected[key]
         self.die = ''
 
     def draw(self):
-        self.die = pygame.draw.rect(screen, die_colors[self.key], [self.x_pos, self.y_pos, 100, 100], 0, 5)
+        #the die body and color are handled here
+        self.die = pygame.draw.rect(screen, white, [self.x_pos, self.y_pos, 100, 100], 0, 5)
+
+        #place the suit here
+        suit_text = font_suits.render(f'{self.suit}', True, self.pip_color_rev)
+        text_rect = suit_text.get_rect()
+        text_rect.center = (self.centerx, self.centery)
+        screen.blit(suit_text, text_rect)
+
+        #place the pips here
         if self.number % 2 == 1:
             pygame.draw.circle(screen, self.pip_color, (self.x_pos + 50, self.y_pos + 50), 10)
         if self.number > 1:
@@ -138,8 +166,8 @@ class Dice:
             pygame.draw.circle(screen, self.pip_color, (self.x_pos + 75, self.y_pos + 50), 10)
 
         if self.selected:
-            pygame.draw.rect(screen, forestgreen, [self.x_pos, self.y_pos, 100, 100], 5, 5)
-        
+            pygame.draw.rect(screen, lime, [self.x_pos, self.y_pos, 100, 100], 5, 5)
+
     def check_click(self, coords):
         if self.die.collidepoint(coords):
             if dice_selected[self.key]:
@@ -320,9 +348,10 @@ def check_totals(totals_list, score_list, bonus):
     totals_list[5] = totals_list[2] + totals_list[3]
     return totals_list, bonus
 
-def check_possible(possible_list, numbers_list, colors_list):
+def check_possible(possible_list, numbers_list, colors_list, suits_list):
     max_count = 0
     max_color_count = 0
+    max_suit_count = 0
     pairodice = 0
 
     if 1 in numbers_list:
@@ -356,14 +385,14 @@ def check_possible(possible_list, numbers_list, colors_list):
         possible_list[14] = True #reds
     else:
         possible_list[14] = False #reds
-    if blue in colors_list:
-        possible_list[15] = True #blues
-    else:
-        possible_list[15] = False #blues
     if yellow in colors_list:
-        possible_list[16] = True #yellows
+        possible_list[15] = True #yellows
     else:
-        possible_list[16] = False #yellows
+        possible_list[15] = False #yellows
+    if blue in colors_list:
+        possible_list[16] = True #blues
+    else:
+        possible_list[16] = False #blues        
     if green in colors_list:
         possible_list[17] = True #greens
     else:
@@ -431,13 +460,20 @@ def check_possible(possible_list, numbers_list, colors_list):
     else:
         possible_list[11] = False
 
-    for index in colors_list:
+    for index in range(len(colors_list)):
         colors_count = colors_list.count(colors_list[index])
         if colors_count > max_color_count:
             max_color_count = colors_count
     
+    for index in range(len(suits_list)):
+        suits_count = suits_list.count(suits_list[index])
+        if suits_count > max_suit_count:
+            max_suit_count = suits_count
 
-
+    if max_color_count == 1:
+        possible_list[24] = True
+    else:
+        possible_list[24] = False
 
     return possible_list
 
@@ -477,13 +513,15 @@ def restart_button():
     global current_score
     global dice_selected
     global die_colors
+    global die_suits
     numbers = [0, -8, -10, -12, -8]
     die_colors = [white, white, white, white, white]
+    die_suits = [' ',' ',' ',' ',' ']
     dice_selected = [False, False, False, False, False]
-    selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-    possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-    done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
-    score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    selected_choice = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    possible = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    done = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    score = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     totals = [0,0,0,0,0,0]
     clicked = -1
     current_score = 0
@@ -492,7 +530,8 @@ def restart_button():
     turn_counter = 0
     rolls_remaining = 3
 
-pygame.mixer.music.load("MUSIC/yachtzedbgm01.ogg")
+music_list = ["MUSIC/yachtzedbgm01.ogg", "MUSIC/yachtzedbgm02.ogg", "MUSIC/yachtzedbgm03.ogg"]
+pygame.mixer.music.load(music_list[0])
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1)  # -1 loops indefinitely
 
@@ -520,8 +559,11 @@ async def main():
     global fx_muted
     global fx_volume
     global die_colors
+    global die_suits
+    global music_list
     bonus_time = False
     col_opt = [red, blue, yellow, green, purple]
+    suit_opt = ['s','h','d','c']
 
     #Shake effect intialization for dice or other objects
     shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
@@ -539,8 +581,17 @@ async def main():
     reset_button = Button(490, 165, 100, 50, gray, 5, reset_text, font_b, black, 0)
 
     music_text = f"BGM: ON"
-    mute_music_button = Button(330, 165, 80, 50, gray, 5, music_text, font_c, black, 0)  # adjust position as needed
-    
+    mute_music_button = Button(330, 165, 80, 30, gray, 5, music_text, font_c, black, 0)  # adjust position as needed
+
+    bgm1_text = f""
+    bgm1_music_button = Button(330, 205, 20, 10, gray, 5, bgm1_text, font_c, black, 0)  # adjust position as needed
+
+    bgm2_text = f""
+    bgm2_music_button = Button(360, 205, 20, 10, gray, 5, bgm2_text, font_c, black, 0)  # adjust position as needed
+
+    bgm3_text = f""
+    bgm3_music_button = Button(390, 205, 20, 10, gray, 5, bgm3_text, font_c, black, 0)  # adjust position as needed
+
     fx_text = f"FX: ON"
     mute_fx_button = Button(420, 165, 60, 50, gray, 5, fx_text, font_c, black, 0)
 
@@ -563,6 +614,7 @@ async def main():
                     if not dice_selected[number]:
                         numbers[number] = random.randint(1,6)
                         die_colors[number] = random.choice(col_opt)
+                        die_suits[number] = random.choice(suit_opt)
         else:
             shakex = [0,0,0,0,0]
             shakey = [0,0,0,0,0]
@@ -644,7 +696,13 @@ async def main():
         mute_music_button.draw()
         mute_fx_button.draw()
 
+        bgm1_music_button.draw()
+        bgm2_music_button.draw()
+        bgm3_music_button.draw()
+
         draw_stuff()
+
+        #Define the choices
 
         ones = Choice(0, 240, WIDTH//2, 30, '1s', selected_choice[0], possible[0], done[0], current_score if selected_choice[0] and not done[0] else score[0])
         twos = Choice(0, 270, WIDTH//2, 30, '2s', selected_choice[1], possible[1], done[1], current_score if selected_choice[1] and not done[1] else score[1])
@@ -654,16 +712,21 @@ async def main():
         sixes = Choice(0, 390, WIDTH//2, 30, '6s', selected_choice[5], possible[5], done[5], current_score if selected_choice[5] and not done[5] else score[5])
         chance = Choice(0, 420, WIDTH//2, 30, 'Chance', selected_choice[13], possible[13], done[13], current_score if selected_choice[13] and not done[13] else score[13])
 
-        reds = 
-        yellows =
-        blues = 
-        greens = 
-        purples =
-        pallete = 
+        reds = Choice(0, 450, WIDTH//2, 30, 'Reds', selected_choice[14], possible[14], done[14], current_score if selected_choice[14] and not done[14] else score[14])
+        yellows = Choice(0, 480, WIDTH//2, 30, 'Yellows', selected_choice[15], possible[15], done[15], current_score if selected_choice[15] and not done[15] else score[15])
+        blues = Choice(0, 510, WIDTH//2, 30, 'Blues', selected_choice[16], possible[16], done[16], current_score if selected_choice[16] and not done[16] else score[16])
+        greens = Choice(0, 540, WIDTH//2, 30, 'Greens', selected_choice[17], possible[17], done[17], current_score if selected_choice[17] and not done[17] else score[17])
+        purples = Choice(0, 570, WIDTH//2, 30, 'Purples', selected_choice[18], possible[18], done[18], current_score if selected_choice[18] and not done[18] else score[18])
+        palette = Choice(0, 600, WIDTH//2, 30, 'Palette', selected_choice[19], possible[19], done[19], current_score if selected_choice[19] and not done[19] else score[19])
 
-        uppersubt = Choice(0, 450, WIDTH//2, 30, 'Upper Subtotal', False, False, True, totals[0] )
-        upperbonus = Choice(0, 480, WIDTH//2, 30, 'Bonus if 80+', False, False, True, totals[1] )
-        uppertotal = Choice(0, 510, WIDTH//2, 30, 'Upper Total', False, False, True, totals[2] )
+        spades = Choice(0, 630, WIDTH//2, 30, 'Spades', selected_choice[20], possible[20], done[20], current_score if selected_choice[20] and not done[20] else score[20])
+        hearts = Choice(0, 660, WIDTH//2, 30, 'Hearts', selected_choice[21], possible[21], done[21], current_score if selected_choice[21] and not done[21] else score[21])
+        diamonds = Choice(0, 690, WIDTH//2, 30, 'Diamonds', selected_choice[22], possible[22], done[22], current_score if selected_choice[22] and not done[22] else score[22])
+        clubs = Choice(0, 720, WIDTH//2, 30, 'Clubs', selected_choice[23], possible[23], done[23], current_score if selected_choice[23] and not done[23] else score[23])
+
+        uppersubt = Choice(0, 750, WIDTH//2, 30, 'Upper Subtotal', False, False, True, totals[0] )
+        upperbonus = Choice(0, 780, WIDTH//2, 30, 'Bonus if 80+', False, False, True, totals[1] )
+        uppertotal = Choice(0, 810, WIDTH//2, 30, 'Upper Total', False, False, True, totals[2] )
 
         two_pair = Choice(WIDTH//2, 240, WIDTH, 30, 'Two Pair', selected_choice[6], possible[6], done[6], current_score if selected_choice[6] and not done[6] else score[6])
         three_kind = Choice(WIDTH//2, 270, WIDTH, 30, 'Three of a Kind', selected_choice[7], possible[7], done[7], current_score if selected_choice[7] and not done[7] else score[7])
@@ -673,14 +736,20 @@ async def main():
         sm_straight = Choice(WIDTH//2, 360, WIDTH, 30, 'Small Straight', selected_choice[11], possible[11], done[11], current_score if selected_choice[11] and not done[11] else score[11])
         lg_straight = Choice(WIDTH//2, 390, WIDTH, 30, 'Large Straight', selected_choice[12], possible[12], done[12], current_score if selected_choice[12] and not done[12] else score[12])
 
-        rainbow = 
-        flush = 
-        straight_flush = 
-        yacht_flush = 
+        rainbow = Choice(WIDTH//2, 450, WIDTH, 30, 'Rainbow', selected_choice[24], possible[24], done[24], current_score if selected_choice[24] and not done[24] else score[24])
+        rainbow_straight = Choice(WIDTH//2, 480, WIDTH, 30, 'Rainbow Straight', selected_choice[25], possible[25], done[25], current_score if selected_choice[25] and not done[25] else score[25])
+        col_flush = Choice(WIDTH//2, 510, WIDTH, 30, 'Color Flush', selected_choice[26], possible[26], done[26], current_score if selected_choice[26] and not done[26] else score[26])
+        straight_col_flush = Choice(WIDTH//2, 540, WIDTH, 30, 'Straight Color Flush', selected_choice[27], possible[27], done[27], current_score if selected_choice[27] and not done[27] else score[27])
+        straight_flush = Choice(WIDTH//2, 570, WIDTH, 30, 'Straight Flush', selected_choice[28], possible[28], done[28], current_score if selected_choice[28] and not done[28] else score[28])
+        rainbow_flush = Choice(WIDTH//2, 600, WIDTH, 30, 'Rainbow Flush', selected_choice[29], possible[29], done[29], current_score if selected_choice[29] and not done[29] else score[29])
+        yacht_flush = Choice(WIDTH//2, 630, WIDTH, 30, 'Yacht Flush', selected_choice[30], possible[30], done[30], current_score if selected_choice[30] and not done[30] else score[30])
+        rainbow_yacht = Choice(WIDTH//2, 660, WIDTH, 30, 'Rainbow Yacht', selected_choice[31], possible[31], done[31], current_score if selected_choice[31] and not done[31] else score[31])
+        yacht_col_flush_suit_flush = Choice(WIDTH//2, 690, WIDTH, 30, 'Yacht Double Flush', selected_choice[32], possible[32], done[32], current_score if selected_choice[32] and not done[32] else score[32])
+        rainbow_yacht_suit_flush = Choice(WIDTH//2, 720, WIDTH, 30, 'Rainbow Yacht Flush', selected_choice[33], possible[33], done[33], current_score if selected_choice[33] and not done[33] else score[33])
 
-        lowersubt = Choice(WIDTH//2, 450, WIDTH, 30, 'Lower Subtotal', False, False, True, totals[3] )
-        bonus1 = Choice(WIDTH//2, 480, WIDTH, 30, 'Bonus Yachtzed', False, False, True, totals[4] )
-        grandtotal = Choice(WIDTH//2, 510, WIDTH, 30, 'Grand Total', False, False, False, totals[5] )
+        lowersubt = Choice(WIDTH//2, 750, WIDTH, 30, 'Lower Subtotal', False, False, True, totals[3] )
+        bonus1 = Choice(WIDTH//2, 780, WIDTH, 30, 'Bonus Yachtzed', False, False, True, totals[4] )
+        grandtotal = Choice(WIDTH//2, 810, WIDTH, 30, 'Grand Total', False, False, False, totals[5] )
 
 
 
@@ -696,7 +765,7 @@ async def main():
                 die4.check_click(event.pos)
                 die5.check_click(event.pos)
                 if 0 <= event.pos[0] <= WIDTH//2:
-                    if 240 <= event.pos[1] <= 450:
+                    if 240 <= event.pos[1] <= 750:
                         if 240 <= event.pos[1] <= 270:
                             clicked = 0
                         if 270 <= event.pos[1] <= 300:
@@ -711,11 +780,31 @@ async def main():
                             clicked = 5
                         if 420 <= event.pos[1] <= 450:
                             clicked = 13
-                        
+                        if 450 <= event.pos[1] <= 480:
+                            clicked = 14
+                        if 480 <= event.pos[1] <= 510:
+                            clicked = 15
+                        if 510 <= event.pos[1] <= 540:
+                            clicked = 16
+                        if 540 <= event.pos[1] <= 570:
+                            clicked = 17
+                        if 570 <= event.pos[1] <= 600:
+                            clicked = 18
+                        if 600 <= event.pos[1] <= 630:
+                            clicked = 19
+                        if 630 <= event.pos[1] <= 660:
+                            clicked = 20
+                        if 660 <= event.pos[1] <= 690:
+                            clicked = 21
+                        if 690 <= event.pos[1] <= 720:
+                            clicked = 22
+                        if 720 <= event.pos[1] <= 750:
+                            clicked = 23
+
                         selected_choice = make_choice(clicked, selected_choice, done)
 
                 if WIDTH//2 < event.pos[0] <= WIDTH:
-                    if 240 <= event.pos[1] <= 450:
+                    if 240 <= event.pos[1] <= 750:
                         if 240 <= event.pos[1] <= 270:
                             clicked = 6
                         if 270 <= event.pos[1] <= 300:
@@ -730,6 +819,26 @@ async def main():
                             clicked = 12
                         if 420 <= event.pos[1] <= 450:
                             clicked = 9
+                        if 450 <= event.pos[1] <= 480:
+                            clicked = 24
+                        if 480 <= event.pos[1] <= 510:
+                            clicked = 25
+                        if 510 <= event.pos[1] <= 540:
+                            clicked = 26
+                        if 540 <= event.pos[1] <= 570:
+                            clicked = 27
+                        if 570 <= event.pos[1] <= 600:
+                            clicked = 28
+                        if 600 <= event.pos[1] <= 630:
+                            clicked = 29
+                        if 630 <= event.pos[1] <= 660:
+                            clicked = 30
+                        if 660 <= event.pos[1] <= 690:
+                            clicked = 31
+                        if 690 <= event.pos[1] <= 720:
+                            clicked = 32
+                        if 720 <= event.pos[1] <= 750:
+                            clicked = 33
 
                         selected_choice = make_choice(clicked, selected_choice, done)
 
@@ -749,6 +858,9 @@ async def main():
                     for i in range(len(dice_selected)):
                         dice_selected[i] = False
                     numbers = [0, -8, -10, -12, -8]
+                    die_colors = [white,white,white,white,white]
+                    die_suits = [' ', ' ', ' ',' ',' ']
+
                     something_selected = False
                     rolls_remaining = 3
                     turn_counter += 1
@@ -766,6 +878,24 @@ async def main():
                     else:
                         pygame.mixer.music.set_volume(music_volume)
                         mute_music_button.text = "BGM: ON"
+                
+                if bgm1_music_button.button.collidepoint(event.pos):
+                    pygame.mixer.music.unload()
+                    pygame.mixer.music.load(music_list[0])
+                    pygame.mixer.music.set_volume(0 if music_muted else music_volume)
+                    pygame.mixer.music.play(-1)
+
+                if bgm2_music_button.button.collidepoint(event.pos):
+                    pygame.mixer.music.unload()
+                    pygame.mixer.music.load(music_list[1])
+                    pygame.mixer.music.set_volume(0 if music_muted else music_volume)
+                    pygame.mixer.music.play(-1)
+
+                if bgm3_music_button.button.collidepoint(event.pos):
+                    pygame.mixer.music.unload()
+                    pygame.mixer.music.load(music_list[2])
+                    pygame.mixer.music.set_volume(0 if music_muted else music_volume)
+                    pygame.mixer.music.play(-1)
 
                 if mute_fx_button.button.collidepoint(event.pos):
                     fx_muted = not fx_muted
@@ -778,15 +908,13 @@ async def main():
                     reset_button.pressed = False
         if roll:
             dice_sounds = random.choice(["FX/BACKROLL.ogg","FX/SHAKE1.ogg","FX/SHAKE3.ogg"])
-            sound = pygame.mixer.Sound(dice_sounds).play()
-            if fx_muted:
-                sound.set_volume(0)
-            else:
-                sound.set_volume(fx_volume)
+            sound = pygame.mixer.Sound(dice_sounds)
+            sound.set_volume(0 if fx_muted else fx_volume)
+            sound.play()
             rolls_remaining -= 1
             roll = False
         
-        possible = check_possible(possible, numbers)
+        possible = check_possible(possible, numbers, die_colors, die_suits)
         current_score = check_scores(selected_choice, numbers, possible, score)
         totals, bonus_time = check_totals(totals, score, bonus_time)
 
@@ -796,6 +924,18 @@ async def main():
         fours.draw()
         fives.draw()
         sixes.draw()
+        chance.draw()
+        reds.draw()
+        yellows.draw()
+        blues.draw()
+        greens.draw()
+        purples.draw()
+        palette.draw()
+        spades.draw()
+        hearts.draw()
+        diamonds.draw()
+        clubs.draw()
+
         uppersubt.draw()
         upperbonus.draw()
         uppertotal.draw()
@@ -807,7 +947,18 @@ async def main():
         sm_straight.draw()
         lg_straight.draw()
         yachtzed.draw()
-        chance.draw()
+        
+        rainbow.draw()
+        straight_flush.draw()
+        col_flush.draw()
+        straight_col_flush.draw()
+        rainbow_flush.draw()
+        rainbow_straight.draw()
+        rainbow_yacht.draw()
+        rainbow_yacht_suit_flush.draw()
+        yacht_flush.draw()
+        yacht_col_flush_suit_flush.draw()
+
 
         lowersubt.draw()
 
