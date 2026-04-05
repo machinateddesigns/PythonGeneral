@@ -89,7 +89,7 @@ font_b = pygame.font.Font(bold, 18)
 font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
-font_suits = pygame.font.Font('FONTS/suits.ttf', 96)
+font_suits = pygame.font.Font('FONTS/Suits.ttf', 96)
 
 #intiial numbers list. Might want to make them all blank
 #numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]

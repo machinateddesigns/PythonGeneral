@@ -5,6 +5,7 @@ import json
 import pygame
 
 #initialization of pygame
+pygame.mixer.pre_init(44100, -16, 2, 4096) 
 pygame.init()
 pygame.mixer.init()
 
@@ -89,7 +90,7 @@ font_b = pygame.font.Font(bold, 18)
 font_m = pygame.font.Font('FONTS/OpenSans-Medium.ttf', 18)
 font_l = pygame.font.Font('FONTS/OpenSans-Light.ttf', 18)
 font_c = pygame.font.Font('FONTS/OpenSans_Condensed-Regular.ttf', 18)
-font_suits = pygame.font.Font('FONTS/suits.ttf', 96)
+font_suits = pygame.font.Font('FONTS/Suits.ttf', 96)
 
 #intiial numbers list. Might want to make them all blank
 #numbers = [random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6),random.randint(1,6)]
@@ -153,7 +154,7 @@ class Dice:
         #place the suit here
         suit_text = font_suits.render(f'{self.suit}', True, self.pip_color_rev)
         text_rect = suit_text.get_rect()
-        text_rect.center = (self.centerx, self.centery)
+        text_rect.center = (self.centerx, self.centery + 5)
         screen.blit(suit_text, text_rect)
 
         #place the pips here
