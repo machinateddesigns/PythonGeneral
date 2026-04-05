@@ -99,6 +99,10 @@ die_colors = [white, white, white, white, white]
 
 die_suits = [' ',' ',' ',' ',' ']
 
+col_opt = [red, blue, yellow, green, purple]
+
+suit_opt = ['s','h','d','c']
+
 #rolls_left = 3 #hiding this for now, looks like since I have a better option, I should use that
 
 dice_selected = [False, False, False, False, False]
@@ -290,7 +294,7 @@ class Choice:
             elif not dice_selected[self.key]:
                 dice_selected[self.key] = True
 
-def check_scores(choice_list, numbers_list, possible_list, current_score):
+def check_scores(choice_list, numbers_list, colors_list, suits_list, possible_list, current_score):
     active = 0
     for index in range(len(choice_list)):
         if choice_list[index]:
@@ -307,7 +311,26 @@ def check_scores(choice_list, numbers_list, possible_list, current_score):
         current_score = numbers_list.count(5) * 5
     elif active == 5:
         current_score = numbers_list.count(6) * 6
-    elif active == 6 or active == 7 or active == 8 or active == 13:
+    elif active == 14:
+        current_score = colors_list.count(red) * 4
+    elif active == 15:
+        current_score = colors_list.count(yellow) * 4
+    elif active == 16:
+        current_score = colors_list.count(blue) * 4
+    elif active == 17:
+        current_score = colors_list.count(green) * 4
+    elif active == 18:
+        current_score = colors_list.count(purple) * 4
+    elif active == 20:
+        current_score = suits_list.count('s') * 5
+    elif active == 21:
+        current_score = suits_list.count('h') * 5
+    elif active == 22:
+        current_score = suits_list.count('d') * 5
+    elif active == 23:
+        current_score = suits_list.count('c') * 5
+
+    elif active == 6 or active == 7 or active == 8 or active == 13 or active == 19:
         if possible_list[active]:
             current_score = sum(numbers_list)
         else:
@@ -331,20 +354,71 @@ def check_scores(choice_list, numbers_list, possible_list, current_score):
         if possible_list[active]:
             current_score = 40
         else:
-            current_score = 0  
+            current_score = 0
+    elif active == 24:
+        if possible_list[active]:
+            current_score = 35
+        else:
+            current_score = 0
+    elif active == 25:
+        if possible_list[active]:
+            current_score = 50
+        else:
+            current_score = 0
+    elif active == 26:
+        if possible_list[active]:
+            current_score = 45
+        else:
+            current_score = 0
+    elif active == 27:
+        if possible_list[active]:
+            current_score = 30
+        else:
+            current_score = 0
+    elif active == 28:
+        if possible_list[active]:
+            current_score = 50
+        else:
+            current_score = 0
+    elif active == 29:
+        if possible_list[active]:
+            current_score = 45
+        else:
+            current_score = 0
+    elif active == 30:
+        if possible_list[active]:
+            current_score = 75
+        else:
+            current_score = 0
+    elif active == 31:
+        if possible_list[active]:
+            current_score = 75
+        else:
+            current_score = 0
+    elif active == 32:
+        if possible_list[active]:
+            current_score = 100
+        else:
+            current_score = 0
+    elif active == 33:
+        if possible_list[active]:
+            current_score = 90
+        else:
+            current_score = 0
+
     return current_score
 
 def check_totals(totals_list, score_list, bonus):
-    totals_list[0] = score_list[0] + score_list[1] + score_list[2] + score_list[3] + score_list[4] + score_list[5] + score_list[13]
-    if totals_list[0] >= 80:
-        totals_list[1] = 40
+    totals_list[0] = score_list[0] + score_list[1] + score_list[2] + score_list[3] + score_list[4] + score_list[5] + score_list[13] + score_list[14] + score_list[15] + score_list[16] + score_list[17] + score_list[18] + score_list[19] + score_list[20] + score_list[21] + score_list[22] + score_list[23]
+    if totals_list[0] >= 250:
+        totals_list[1] = 100
     else:
         totals_list[1] = 0
     totals_list[2] = totals_list[0] + totals_list[1]
     if bonus:
         totals_list[4] += 100
         bonus = False
-    totals_list[3] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + totals_list[4]
+    totals_list[3] = score_list[6] + score_list[7] + score_list[8] + score_list[9] + score_list[10] + score_list[11] + score_list[12] + score_list[24] + score_list[25] + score_list[26] + score_list[27] + score_list[28] + score_list[29] + score_list[30] + score_list[31] + score_list[32] + score_list[33] + totals_list[4]
     totals_list[5] = totals_list[2] + totals_list[3]
     return totals_list, bonus
 
@@ -401,6 +475,25 @@ def check_possible(possible_list, numbers_list, colors_list, suits_list):
         possible_list[18] = True #purples
     else:
         possible_list[18] = False #purples
+
+    possible_list[19] = True #Palette
+
+    if 's' in suits_list:
+        possible_list[20] = True #spades
+    else:
+        possible_list[20] = False #spades
+    if 'h' in suits_list:
+        possible_list[21] = True #spades
+    else:
+        possible_list[21] = False #spades
+    if 'd' in suits_list:
+        possible_list[22] = True #spades
+    else:
+        possible_list[22] = False #spades
+    if 'c' in suits_list:
+        possible_list[23] = True #spades
+    else:
+        possible_list[23] = False #spades
 
     for index in range(1,7):
         count = numbers_list.count(index)
@@ -460,20 +553,34 @@ def check_possible(possible_list, numbers_list, colors_list, suits_list):
     else:
         possible_list[11] = False
 
-    for index in range(len(colors_list)):
-        colors_count = colors_list.count(colors_list[index])
-        if colors_count > max_color_count:
-            max_color_count = colors_count
-    
-    for index in range(len(suits_list)):
-        suits_count = suits_list.count(suits_list[index])
-        if suits_count > max_suit_count:
-            max_suit_count = suits_count
+    #counting the like colors max amount
+    colors_count = [colors_list.count(c) for c in col_opt]
+    max_color_count = max(colors_count)
 
-    if max_color_count == 1:
-        possible_list[24] = True
-    else:
-        possible_list[24] = False
+    #counting the like suits max amount
+    suits_count = [suits_list.count(s) for s in suit_opt]
+    max_suit_count = max(suits_count)
+
+    #lower new stuff, highly difficult! Might need extra turns!
+    possible_list[24] = max_color_count == 1
+
+    possible_list[25] = possible_list[24] and possible_list[12]
+
+    possible_list[26] = max_color_count == 5
+        
+    possible_list[27] = max_suit_count == 5
+
+    possible_list[28] = max_suit_count == 5 and possible_list[12]
+
+    possible_list[29] = max_suit_count ==5 and max_color_count == 1
+
+    possible_list[30] = max_count == 5 and max_suit_count == 5
+
+    possible_list[31] = max_count == 5 and max_color_count == 1
+
+    possible_list[32] = max_count == 5 and max_color_count == 5 and max_suit_count == 5
+
+    possible_list[33] = max_count == 5 and max_suit_count == 5 and max_color_count == 1
 
     return possible_list
 
@@ -561,9 +668,9 @@ async def main():
     global die_colors
     global die_suits
     global music_list
+    global col_opt
+    global suit_opt
     bonus_time = False
-    col_opt = [red, blue, yellow, green, purple]
-    suit_opt = ['s','h','d','c']
 
     #Shake effect intialization for dice or other objects
     shakex = [0,0,0,0,0] #are these supposed to be lists, not integers? They were working all the same.
@@ -725,7 +832,7 @@ async def main():
         clubs = Choice(0, 720, WIDTH//2, 30, 'Clubs', selected_choice[23], possible[23], done[23], current_score if selected_choice[23] and not done[23] else score[23])
 
         uppersubt = Choice(0, 750, WIDTH//2, 30, 'Upper Subtotal', False, False, True, totals[0] )
-        upperbonus = Choice(0, 780, WIDTH//2, 30, 'Bonus if 80+', False, False, True, totals[1] )
+        upperbonus = Choice(0, 780, WIDTH//2, 30, 'Bonus if 250+', False, False, True, totals[1] )
         uppertotal = Choice(0, 810, WIDTH//2, 30, 'Upper Total', False, False, True, totals[2] )
 
         two_pair = Choice(WIDTH//2, 240, WIDTH, 30, 'Two Pair', selected_choice[6], possible[6], done[6], current_score if selected_choice[6] and not done[6] else score[6])
@@ -739,7 +846,7 @@ async def main():
         rainbow = Choice(WIDTH//2, 450, WIDTH, 30, 'Rainbow', selected_choice[24], possible[24], done[24], current_score if selected_choice[24] and not done[24] else score[24])
         rainbow_straight = Choice(WIDTH//2, 480, WIDTH, 30, 'Rainbow Straight', selected_choice[25], possible[25], done[25], current_score if selected_choice[25] and not done[25] else score[25])
         col_flush = Choice(WIDTH//2, 510, WIDTH, 30, 'Color Flush', selected_choice[26], possible[26], done[26], current_score if selected_choice[26] and not done[26] else score[26])
-        straight_col_flush = Choice(WIDTH//2, 540, WIDTH, 30, 'Straight Color Flush', selected_choice[27], possible[27], done[27], current_score if selected_choice[27] and not done[27] else score[27])
+        flush = Choice(WIDTH//2, 540, WIDTH, 30, 'Flush', selected_choice[27], possible[27], done[27], current_score if selected_choice[27] and not done[27] else score[27])
         straight_flush = Choice(WIDTH//2, 570, WIDTH, 30, 'Straight Flush', selected_choice[28], possible[28], done[28], current_score if selected_choice[28] and not done[28] else score[28])
         rainbow_flush = Choice(WIDTH//2, 600, WIDTH, 30, 'Rainbow Flush', selected_choice[29], possible[29], done[29], current_score if selected_choice[29] and not done[29] else score[29])
         yacht_flush = Choice(WIDTH//2, 630, WIDTH, 30, 'Yacht Flush', selected_choice[30], possible[30], done[30], current_score if selected_choice[30] and not done[30] else score[30])
@@ -915,7 +1022,7 @@ async def main():
             roll = False
         
         possible = check_possible(possible, numbers, die_colors, die_suits)
-        current_score = check_scores(selected_choice, numbers, possible, score)
+        current_score = check_scores(selected_choice, numbers, die_colors, die_suits, possible, score)
         totals, bonus_time = check_totals(totals, score, bonus_time)
 
         ones.draw()
@@ -949,16 +1056,15 @@ async def main():
         yachtzed.draw()
         
         rainbow.draw()
-        straight_flush.draw()
-        col_flush.draw()
-        straight_col_flush.draw()
-        rainbow_flush.draw()
         rainbow_straight.draw()
-        rainbow_yacht.draw()
-        rainbow_yacht_suit_flush.draw()
+        col_flush.draw()
+        flush.draw()
+        straight_flush.draw()
         yacht_flush.draw()
+        rainbow_flush.draw()
+        rainbow_yacht.draw()
         yacht_col_flush_suit_flush.draw()
-
+        rainbow_yacht_suit_flush.draw()
 
         lowersubt.draw()
 
@@ -995,7 +1101,7 @@ async def main():
             text_rect3.centery = (screen_center[1] + 72  + 120)
             screen.blit(gamestarttext3, text_rect3)
 
-        if turn_counter >= 14:
+        if turn_counter >= 34:
             game_over = True
 
         if game_over:
