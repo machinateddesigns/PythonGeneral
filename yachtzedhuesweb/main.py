@@ -636,7 +636,7 @@ def restart_button():
     something_selected = False
     game_over = False
     turn_counter = 0
-    rolls_remaining = 3
+    rolls_remaining = 5
 
 music_list = ["MUSIC/yachtzedbgm01.ogg", "MUSIC/yachtzedbgm02.ogg", "MUSIC/yachtzedbgm03.ogg"]
 pygame.mixer.music.load(music_list[0])
@@ -650,7 +650,7 @@ async def main():
     #globalize the variable
     global rolls_remaining
     #local rolls variable
-    rolls_remaining = 3 #3
+    rolls_remaining = 5 #3
     #Loading dice sounds
     #need to load possible as a global variable before it's used or redefined
     global possible
@@ -954,7 +954,7 @@ async def main():
                     roll_button.pressed = True
                     if rolls_remaining > 0:
                         roll = True
-                if accept_button.button.collidepoint(event.pos) and something_selected and rolls_remaining < 3:
+                if accept_button.button.collidepoint(event.pos) and something_selected and rolls_remaining < 5:
                     accept_button.pressed = True
                     if score[9] == 50 and done[9] and possible[9]:
                         bonus_time = True
@@ -970,7 +970,7 @@ async def main():
                     die_suits = [' ', ' ', ' ',' ',' ']
 
                     something_selected = False
-                    rolls_remaining = 3
+                    rolls_remaining = 5
                     turn_counter += 1
                 if game_over == True:
                     reset_button.text = f"RESTART GAME"
@@ -1073,7 +1073,7 @@ async def main():
 
         grandtotal.draw()
 
-        if turn_counter == 0 and rolls_remaining == 3:
+        if turn_counter == 0 and rolls_remaining == 5:
             
             bdsize = (600, 301)
             backdrop = pygame.Rect(screen_center[0] - (bdsize[0]//2), screen_center[1] - (bdsize[1]//2) + 119, bdsize[0], bdsize[1])
