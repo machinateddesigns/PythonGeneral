@@ -50,6 +50,9 @@ def genPassword(minLength, lower=True, upper=True, number=True, specialchar=True
 
 print("Password will contain uppercase, lowercase, numbers, and special characters. We are not compromising security.")
 minLength = int(input("Enter the minimum length: "))
-
-pwd = genPassword(minLength)
-print(f"The generated password is: {pwd}")
+pwnum = int(input("How many passwords to generate? "))
+x = 0
+while x < pwnum:
+    pwd = genPassword(minLength)
+    print(f"The generated password is: {pwd}")
+    x += 1
